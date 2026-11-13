@@ -3,3 +3,5 @@
 !video/captures/*.mp4
 kokoro.onnx
 voices.bin
+assets
+three

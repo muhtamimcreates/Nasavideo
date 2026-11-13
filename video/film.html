@@ -1,0 +1,499 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:SG;src:url(fonts/SpaceGrotesk-Regular.ttf);font-weight:400}
+@font-face{font-family:SG;src:url(fonts/SpaceGrotesk-Medium.ttf);font-weight:500}
+@font-face{font-family:SG;src:url(fonts/SpaceGrotesk-300.ttf);font-weight:300}
+@font-face{font-family:SG;src:url(fonts/SpaceGrotesk-600.ttf);font-weight:600}
+@font-face{font-family:SG;src:url(fonts/SpaceGrotesk-Bold.ttf);font-weight:700}
+html,body{margin:0;background:#020307}
+canvas{display:block}
+</style>
+<script src="three/build/three.min.js"></script>
+<script src="three/examples/js/loaders/GLTFLoader.js"></script>
+<script src="three/examples/js/loaders/DRACOLoader.js"></script>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// "Abandoned, But Not Forgotten" — documentary film renderer.
+// 3D shots use the website's NASA 3D Resources models and planet textures (served from ./assets),
+// graded with the website's blue duotone. Typography follows the website's type scale (x1.4 for video).
+const W = 1920, H = 1080, RW = 1440, RH = 810;
+const out = document.getElementById('c').getContext('2d');
+const bufA = new OffscreenCanvas(W, H), bufB = new OffscreenCanvas(W, H);
+let TL = null, SCENES = [], WORDS = null;
+
+// ---------- brand tokens (from the website's :root) ----------
+const C = { void: '#020307', hull: '#050913', line: '#10182c', dust: '#a7b3cf', white: '#eef3ff', head2: '#5d6f99',
+  cobalt: '#3d7bff', signal: '#6f9dff', muted: '#6c7a9c', silent: '#7f8db0', label: '#8e9cc0' };
+const GRADE = 'grayscale(1) sepia(.9) hue-rotate(180deg) saturate(2.1) brightness(.86) contrast(1.15)';
+// website type scale x1.4 (site px in comments)
+const TYPE = { hero: 124 /*88*/, h2: 118 /*84*/, h3: 78 /*56*/, stat: 112 /*80*/, card: 50 /*36*/, lead: 28 /*20*/, body: 24 /*17*/, eyebrow: 19 /*13-14*/, chip: 17 /*12*/ };
+
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = x => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const eout = x => 1 - Math.pow(1 - clamp(x), 3);
+const lerp = (a, b, x) => a + (b - a) * x;
+const fin = (u, s, d = .7) => eout((u - s) / d);
+function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+
+// ---------- typography in the site's styles ----------
+function setFont(g, size, weight, track) { g.font = `${weight} ${size}px SG`; g.letterSpacing = (track || 0) + 'px'; }
+// two-tone uppercase headline: line 1 semibold, line 2 regular at .78; periwinkle -> white gradient
+function head(g, lines, x, y, { size = TYPE.h2, align = 'left', alpha = 1, stagger = 0, u = 99, gap = .93 } = {}) {
+  lines.forEach((s, i) => {
+    const a = alpha * (stagger ? fin(u, i * stagger, .8) : 1); if (a <= 0) return;
+    g.save(); g.globalAlpha *= a * (i ? .78 : 1); setFont(g, size, i ? 400 : 600, -2);
+    g.textAlign = align; g.textBaseline = 'alphabetic';
+    const str = s.toUpperCase(), w = g.measureText(str).width, x0 = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+    const yy = y + i * size * gap + (1 - a) * 18;
+    const gr = g.createLinearGradient(x0, yy - size, x0 + w, yy);
+    gr.addColorStop(0, '#86a3e8'); gr.addColorStop(.45, '#b9cbf2'); gr.addColorStop(1, '#f5f7ff');
+    g.shadowColor = 'rgba(2,3,7,.55)'; g.shadowBlur = 30; g.fillStyle = gr; g.fillText(str, x, yy); g.restore();
+  });
+}
+function text(g, s, x, y, { size = TYPE.body, weight = 400, color = C.dust, align = 'left', alpha = 1, track = -.3, base = 'alphabetic' } = {}) {
+  if (alpha <= 0) return;
+  g.save(); g.globalAlpha *= alpha; setFont(g, size, weight, track); g.textAlign = align; g.textBaseline = base;
+  g.shadowColor = 'rgba(2,3,7,.7)'; g.shadowBlur = 18; g.fillStyle = color; g.fillText(s, x, y); g.restore();
+}
+const eyebrow = (g, s, x, y, o = {}) => text(g, s, x, y, { size: TYPE.eyebrow, weight: 500, color: C.label, track: -.1, ...o });
+function stat(g, s, x, y, { alpha = 1, align = 'left', size = TYPE.stat } = {}) {
+  if (alpha <= 0) return;
+  g.save(); g.globalAlpha *= alpha; setFont(g, size, 600, -2); g.textAlign = align;
+  const w = g.measureText(s).width, x0 = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  const gr = g.createLinearGradient(x0, 0, x0 + w, 0); gr.addColorStop(0, '#93a6dc'); gr.addColorStop(1, '#f5f7ff');
+  g.shadowColor = 'rgba(2,3,7,.6)'; g.shadowBlur = 30; g.fillStyle = gr; g.fillText(s, x, y); g.restore();
+}
+// status chip: same box everywhere; only the dot colour says the status
+function chip(g, s, x, y, live, t, alpha = 1) {
+  if (alpha <= 0) return;
+  g.save(); g.globalAlpha *= alpha; setFont(g, TYPE.chip, 500, 0);
+  const w = Math.max(266, g.measureText(s).width + 64), h = 44;
+  g.fillStyle = 'rgba(2,3,7,.55)'; g.fillRect(x, y, w, h);
+  g.strokeStyle = 'rgba(160,190,255,.28)'; g.lineWidth = 1.4; g.strokeRect(x + .5, y + .5, w - 1, h - 1);
+  g.fillStyle = live ? C.signal : C.silent; g.globalAlpha *= live ? .65 + .35 * Math.cos(t * Math.PI) : 1;
+  g.beginPath(); g.arc(x + 24, y + h / 2, 5.5, 0, 7); g.fill(); g.globalAlpha = alpha;
+  g.fillStyle = C.dust; g.textBaseline = 'middle'; g.fillText(s, x + 44, y + h / 2 + 1); g.restore();
+}
+function card(g, x, y, w, h, alpha = 1, hi = false) {
+  if (alpha <= 0) return;
+  g.save(); g.globalAlpha *= alpha;
+  const gr = g.createLinearGradient(0, y, 0, y + h); gr.addColorStop(0, 'rgba(10,18,40,.72)'); gr.addColorStop(1, 'rgba(5,9,19,.9)');
+  g.fillStyle = gr; g.fillRect(x, y, w, h); g.strokeStyle = hi ? 'rgba(61,123,255,.7)' : 'rgba(160,190,255,.16)'; g.lineWidth = 1.4; g.strokeRect(x + .5, y + .5, w - 1, h - 1);
+  g.restore();
+}
+function shade(g, side = 'left', k = .8) {   // legibility gradient behind text, like the site's hero overlays
+  const gr = side === 'left' ? g.createLinearGradient(0, 0, W * .7, 0) : side === 'bottom' ? g.createLinearGradient(0, H, 0, H * .45) : g.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * .55);
+  gr.addColorStop(0, `rgba(2,3,7,${k})`); gr.addColorStop(1, 'rgba(2,3,7,0)'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+}
+
+// ---------- three.js setup ----------
+const R = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+R.setPixelRatio(1); R.setSize(RW, RH, false); R.outputEncoding = THREE.sRGBEncoding;
+R.toneMapping = THREE.ACESFilmicToneMapping; R.toneMappingExposure = 1.1;
+const ENV = (() => {   // same soft studio environment the website uses for its models
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 512; const g = c.getContext('2d');
+  const sky = g.createLinearGradient(0, 0, 0, 512);
+  sky.addColorStop(0, '#d9e2f5'); sky.addColorStop(.42, '#55658a'); sky.addColorStop(.52, '#0c1224'); sky.addColorStop(1, '#020308');
+  g.fillStyle = sky; g.fillRect(0, 0, 1024, 512);
+  const spot = (x, y, r, col) => { const s = g.createRadialGradient(x, y, 0, x, y, r); s.addColorStop(0, col); s.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = s; g.fillRect(0, 0, 1024, 512); };
+  spot(300, 140, 90, 'rgba(255,250,238,1)'); spot(300, 140, 26, 'rgba(255,255,255,1)'); spot(800, 220, 170, 'rgba(70,120,255,.75)');
+  const t = new THREE.CanvasTexture(c); t.mapping = THREE.EquirectangularReflectionMapping; t.encoding = THREE.sRGBEncoding;
+  const pm = new THREE.PMREMGenerator(R), e = pm.fromEquirectangular(t).texture; pm.dispose(); return e;
+})();
+const TLd = new THREE.TextureLoader();
+const texP = []; const tex = (u, rep) => { const t = TLd.load(u); t.encoding = THREE.sRGBEncoding; t.anisotropy = 8; if (rep) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep, rep); } texP.push(new Promise(r => { const i = setInterval(() => { if (t.image && t.image.complete) { clearInterval(i); r(); } }, 50); })); return t; };
+const TX = { earth: tex('assets/tex/earth.jpg'), night: tex('assets/tex/night.jpg'), clouds: tex('assets/tex/clouds.jpg'), moon: tex('assets/tex/moonhi.jpg'), mars: tex('assets/tex/mars.jpg'),
+  marsG: tex('assets/tex/mars.jpg', 5), moonG: tex('assets/tex/moonhi.jpg', 4) };
+TX.clouds.encoding = THREE.LinearEncoding;
+const deg = Math.PI / 180;
+
+function upgrade(x) {   // the website's mapping from flat model colours to spacecraft materials
+  const c = x.color ? x.color.clone() : new THREE.Color(1, 1, 1), hsl = {}; c.getHSL(hsl);
+  const n = new THREE.MeshStandardMaterial({ map: x.map || null, color: c, envMap: ENV, envMapIntensity: 1.1, side: x.side });
+  if (hsl.h > .05 && hsl.h < .17 && hsl.s > .25) { n.color.setRGB(.86, .62, .22); n.metalness = 1; n.roughness = .28; }
+  else if (hsl.l > .7) { n.metalness = .12; n.roughness = .48; }
+  else if (hsl.l > .3) { n.metalness = .9; n.roughness = .32; }
+  else { n.metalness = .5; n.roughness = .55; }
+  return n;
+}
+const loader = new THREE.GLTFLoader(); const dl = new THREE.DRACOLoader(); dl.setDecoderPath('assets/draco/'); dl.setDecoderConfig({ type: 'js' }); loader.setDRACOLoader(dl);
+const MODELS = {};
+function loadModel(name) {
+  return new Promise(res => {
+    const sc = document.createElement('script'); sc.src = 'assets/models/' + name + '.js';
+    sc.onload = () => {
+      const s = GLB[name], bin = atob(s), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+      loader.parse(u.buffer, '', gl => {
+        const o = gl.scene; o.traverse(m => { if (m.isMesh && m.material) { if (!m.geometry.attributes.normal) m.geometry.computeVertexNormals(); m.material = Array.isArray(m.material) ? m.material.map(upgrade) : upgrade(m.material); } });
+        const box = new THREE.Box3().setFromObject(o), size = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
+        o.position.sub(ctr); const w = new THREE.Group(); w.add(o); w.scale.setScalar(1 / Math.max(size.x, size.y, size.z));
+        MODELS[name] = w; res();
+      }, e => { console.error('model', name, e); res(); });
+    };
+    sc.onerror = () => { console.error('script', name); res(); }; document.head.appendChild(sc);
+  });
+}
+const model = (name, size = 1) => { const m = MODELS[name].clone(); m.scale.multiplyScalar(size); return m; };
+
+function starfield(n = 5000, r = 400, seed = 3) {
+  const R_ = rng(seed), p = new Float32Array(n * 3), col = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { const u = R_() * 2 - 1, th = R_() * 6.283, s = Math.sqrt(1 - u * u); p.set([r * s * Math.cos(th), r * u, r * s * Math.sin(th)], i * 3); const b = .35 + .65 * Math.pow(R_(), 3); col.set([b * .85, b * .9, b], i * 3); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  return new THREE.Points(g, new THREE.PointsMaterial({ size: 1.6, sizeAttenuation: false, vertexColors: true, depthWrite: false }));
+}
+const atmMat = new THREE.ShaderMaterial({
+  vertexShader: 'varying vec3 vN; void main(){ vN = normalize(normalMatrix*normal); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
+  fragmentShader: 'varying vec3 vN; void main(){ float i = pow(max(0.0, 0.66 - dot(vN, vec3(0.0,0.0,1.0))), 2.0); gl_FragColor = vec4(0.32,0.46,0.9,1.0)*i*0.9; }',
+  side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false });
+const sph = new THREE.SphereGeometry(1, 128, 96);
+function globe(kind) {
+  const g = new THREE.Group(), spin = new THREE.Group(); g.add(spin);
+  let mat;
+  if (kind === 'earth') mat = new THREE.MeshStandardMaterial({ map: TX.earth, roughness: .9, metalness: 0, emissiveMap: TX.night, emissive: new THREE.Color(1, .85, .6), emissiveIntensity: 1.2 });
+  else mat = new THREE.MeshStandardMaterial({ map: TX[kind], roughness: 1, metalness: 0 });
+  spin.add(new THREE.Mesh(sph, mat));
+  if (kind === 'earth') { const cl = new THREE.Mesh(sph, new THREE.MeshStandardMaterial({ alphaMap: TX.clouds, transparent: true, color: 0xffffff, opacity: .9, depthWrite: false })); cl.scale.setScalar(1.008); spin.add(cl); g.userData.clouds = cl; }
+  const a = new THREE.Mesh(sph, atmMat); a.scale.setScalar(kind === 'earth' ? 1.06 : 1.035); g.add(a);
+  g.userData.spin = spin; return g;
+}
+// face a lat/lon toward +z (camera)
+function faceLatLon(gl, lat, lon) { gl.userData.spin.rotation.set(lat * deg, -(lon + 90) * deg, 0, 'XYZ'); }
+function noise2(seed) { const R_ = rng(seed), P = []; for (let i = 0; i < 512; i++) P.push(R_()); return (x, y) => { const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi; const h = (a, b) => P[((a * 73 + b * 151) % 512 + 512) % 512]; const s = v => v * v * (3 - 2 * v); const a = h(xi, yi), b = h(xi + 1, yi), c = h(xi, yi + 1), d = h(xi + 1, yi + 1); return lerp(lerp(a, b, s(xf)), lerp(c, d, s(xf)), s(yf)); }; }
+function terrain(map, seed, amp = 1.2) {
+  const geo = new THREE.PlaneGeometry(160, 160, 280, 280); geo.rotateX(-Math.PI / 2);
+  const n = noise2(seed), p = geo.attributes.position;
+  for (let i = 0; i < p.count; i++) { const x = p.getX(i), z = p.getZ(i); let h = 0, f = .04, a = amp * 3; for (let o = 0; o < 6; o++) { h += (n(x * f + 7, z * f + 3) - .5) * a; f *= 2.1; a *= .45; } const r = Math.hypot(x, z); h += Math.max(0, (r - 25)) * .06 * n(x * .01, z * .01) * amp; p.setY(i, h); }
+  geo.computeVertexNormals();
+  const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map, roughness: 1, metalness: 0, color: 0xd8d8d8 }));
+  const R_ = rng(seed + 9), rocks = new THREE.Group(), rg = new THREE.DodecahedronGeometry(1, 1), rm = new THREE.MeshStandardMaterial({ map, roughness: 1, color: 0x9a9a9a, flatShading: true });
+  for (let i = 0; i < 260; i++) { const r = new THREE.Mesh(rg, rm), x = (R_() - .5) * 60, z = (R_() - .5) * 60; r.scale.set(.05 + R_() * .3, .03 + R_() * .18, .05 + R_() * .3); r.rotation.set(R_() * 3, R_() * 3, R_() * 3); r.position.set(x, heightAt(m, x, z) + .02, z); rocks.add(r); }
+  m.add(rocks); return m;
+}
+function heightAt(mesh, x, z) { const p = mesh.geometry.attributes.position, seg = 280, size = 160; const ix = Math.round((x / size + .5) * seg), iz = Math.round((z / size + .5) * seg); return p.getY(clamp(iz, 0, seg) * (seg + 1) + clamp(ix, 0, seg)); }
+function sunLight(sc, dir, intensity = 2.6, color = 0xfff4e6) { const l = new THREE.DirectionalLight(color, intensity); l.position.copy(dir); sc.add(l); return l; }
+function studio(sc) { sc.add(new THREE.HemisphereLight(0xdfe7ff, 0x0a1230, .35)); const k = sunLight(sc, new THREE.Vector3(4, 3, 5), 2.6); const r = sunLight(sc, new THREE.Vector3(-5, 2, -4), 1.3, 0x7d98d8); return { k, r }; }
+function sunSprite(size = 30) { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'); const s = g.createRadialGradient(128, 128, 0, 128, 128, 128); s.addColorStop(0, 'rgba(255,255,255,1)'); s.addColorStop(.08, 'rgba(255,250,240,.95)'); s.addColorStop(.25, 'rgba(200,215,255,.25)'); s.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = s; g.fillRect(0, 0, 256, 256); const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); sp.scale.setScalar(size); return sp; }
+function dustParticles(n = 3000, seed = 5) { const R_ = rng(seed), p = new Float32Array(n * 3); for (let i = 0; i < n; i++) p.set([(R_() - .5) * 30, R_() * 6, (R_() - .5) * 30], i * 3); const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p, 3)); return new THREE.Points(g, new THREE.PointsMaterial({ size: .05, color: 0xd9c2a8, transparent: true, opacity: .0, depthWrite: false })); }
+
+// ---------- 3D sets (built once, reused by shots) ----------
+const SET = {};
+function buildSets() {
+  // deep space with a Voyager-class probe
+  { const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(32, RW / RH, .01, 1000); sc.add(starfield()); studio(sc);
+    const v = model('voyager', 2.2); sc.add(v); const sun = sunSprite(6); sun.position.set(-60, 14, -200); sc.add(sun);
+    const earth = new THREE.Mesh(new THREE.SphereGeometry(.35, 16, 12), new THREE.MeshBasicMaterial({ color: 0x8fb0ff })); earth.position.set(-48, 10, -190); sc.add(earth);
+    SET.space = { sc, cam, v }; }
+  // Mars surface with Opportunity
+  { const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(36, RW / RH, .05, 400); const ground = terrain(TX.marsG, 11, 1.0); sc.add(ground);
+    sc.add(new THREE.HemisphereLight(0xc9d6ff, 0x2a1a10, .45)); const sun = sunLight(sc, new THREE.Vector3(-30, 9, -40), 2.4);
+    const sp = sunSprite(9); sp.position.set(-120, 32, -160); sc.add(sp);
+    const sky = new THREE.Mesh(new THREE.SphereGeometry(300, 32, 16), new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false, uniforms: { k: { value: 0 } },
+      vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
+      fragmentShader: 'uniform float k; varying vec3 vP; void main(){ float h = clamp(vP.y*3.0, 0.0, 1.0); vec3 c = mix(vec3(0.62,0.5,0.42), vec3(0.08,0.06,0.07), h); c = mix(c, vec3(0.55,0.42,0.32), k); gl_FragColor = vec4(c,1.0); }' }));
+    sc.add(sky);
+    ground.position.y = -heightAt(ground, 0, 0); const rover = model('opportunity', 1.6); rover.position.set(0, .45, 0); sc.add(rover);
+    const dust = dustParticles(); sc.add(dust); sc.add(starfield(1500, 280, 9));
+    sc.fog = new THREE.FogExp2(0x8a6d58, .004);
+    SET.mars = { sc, cam, ground, rover, sun, sp, sky, dust }; }
+  // Moon surface (+ Apollo LM descent stage)
+  { const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(34, RW / RH, .05, 600); const ground = terrain(TX.moonG, 21, 1.4); sc.add(ground);
+    sc.add(starfield(4000, 400, 4)); sc.add(new THREE.HemisphereLight(0x8090b0, 0x050505, .12)); sunLight(sc, new THREE.Vector3(30, 6, -10), 3.0);
+    const earth = globe('earth'); earth.scale.setScalar(5); earth.position.set(-40, 26, -140); faceLatLon(earth, 15, 20); sc.add(earth);
+    const lm = model('lm', 2.4); lm.position.set(2, heightAt(ground, 2, -3) + 1.1, -3); sc.add(lm);
+    SET.moon = { sc, cam, ground, lm, earth }; }
+  // planets in space
+  { const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(30, RW / RH, .1, 1000); sc.add(starfield(6000, 500, 8)); sc.add(new THREE.AmbientLight(0x223355, .15)); const s = sunLight(sc, new THREE.Vector3(-5, 1.5, 3), 3.2);
+    const earth = globe('earth'), mars = globe('mars'), moon = globe('moon'); sc.add(earth, mars, moon);
+    SET.orbit = { sc, cam, earth, mars, moon, sun: s }; }
+  // single-model studio shots (InSight, Viking, Pioneer, DSN)
+  for (const name of ['insight', 'viking', 'pioneer', 'dsn']) { const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(30, RW / RH, .01, 1000); sc.add(starfield(4000, 400, name.length)); const l = studio(sc); const m = model(name, 2); sc.add(m); SET[name] = { sc, cam, m, l }; }
+}
+function only(set, ...vis) { for (const k of ['earth', 'mars', 'moon']) if (set[k]) set[k].visible = vis.includes(k); }
+// render a set into g (optionally a sub-rect), graded with the site's duotone
+function shot(g, set, { x = 0, y = 0, w = W, h = H, grade = true } = {}) {
+  set.cam.aspect = w / h; set.cam.updateProjectionMatrix();
+  const rw = Math.round(RW * w / W), rh = Math.round(RH * h / H); R.setSize(rw, rh, false);
+  R.render(set.sc, set.cam);
+  g.save(); g.filter = grade ? GRADE : 'none'; g.drawImage(R.domElement, 0, 0, rw, rh, x, y, w, h); g.restore();
+}
+function orbitCam(cam, target, dist, az, el) { cam.position.set(target.x + dist * Math.cos(el) * Math.sin(az), target.y + dist * Math.sin(el), target.z + dist * Math.cos(el) * Math.cos(az)); cam.lookAt(target); }
+const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+
+// ---------- shots, one per script scene ----------
+const S = {};
+S.signal = (g, u, d, t, L) => {
+  const tB = TL.lines[1].start - L.start - .3;
+  if (u < tB) {
+    // cold open: black + "Signal: none", then Voyager in deep space
+    g.fillStyle = C.void; g.fillRect(0, 0, W, H);
+    const a = fin(u, 2.2, 2.4);
+    if (a > 0) { const s = SET.space; s.v.rotation.set(.25, -.6 + u * .02, .1); orbitCam(s.cam, V3(0, 0, 0), 5.6 - u * .12, -.5 + u * .015, .12); g.save(); g.globalAlpha = a; shot(g, s); g.restore(); }
+    shade(g, 'left', .65);
+    chip(g, u < 2.2 ? 'Signal: none' : 'Voyager 1 · Still transmitting', 120, 110, u >= 2.2, t, fin(u, .2, .4));
+    head(g, ['Abandoned,', 'but not forgotten.'], W / 2, 520, { size: TYPE.h2, align: 'center', alpha: fin(u, .5, .7) * (1 - fin(u, 2.0, .5)) });
+    if (u > 2.6) {
+      eyebrow(g, 'Launched 1977 · Distance from Earth', 120, 770, { alpha: fin(u, 3.2) });
+      stat(g, Math.round(24.9e9 + (u - 2.6) * 61000).toLocaleString('en-US') + ' km', 120, 880, { alpha: fin(u, 3.4) });
+    }
+  } else {
+    const v = u - tB, s = SET.mars; s.sky.material.uniforms.k.value = 0; s.dust.material.opacity = 0; s.sc.fog.density = .006;
+    s.rover.position.set(0, .45, 0); orbitCam(s.cam, V3(0, .7, 0), 6.5 - v * .15, 2.4 + v * .03, .16); shot(g, s);
+    shade(g, 'left', .7);
+    chip(g, 'Opportunity · Silent', 120, 110, false, t, fin(v, .2, .4));
+    eyebrow(g, 'Mars · Meridiani Planum', 120, 770, { alpha: fin(v, .4) });
+    const y = Math.min(8, Math.floor(v * 1.9)); stat(g, y + (y === 1 ? ' year' : ' years') + ' of silence', 120, 880, { alpha: fin(v, .6), size: 96 });
+  }
+};
+S.split = (g, u, d, t) => {
+  const mid = W / 2, s = SET.space, m = SET.mars;
+  s.v.rotation.set(.25, -.4 + u * .03, .1); orbitCam(s.cam, V3(0, 0, 0), 5.2, -.4, .1); shot(g, s, { x: 0, y: 0, w: mid, h: H });
+  m.sc.fog.density = .006; m.rover.position.set(0, .45, 0); orbitCam(m.cam, V3(0, .7, 0), 5.5, 2.8 + u * .02, .14); shot(g, m, { x: mid, y: 0, w: mid, h: H });
+  g.fillStyle = C.void; g.fillRect(mid - 1, 0, 2, H);
+  shade(g, 'bottom', .6);
+  chip(g, 'Voyager 1 · Transmitting', 100, 110, true, t, fin(u, .3));
+  chip(g, 'Opportunity · Silent', mid + 100, 110, false, t, fin(u, .6));
+  const words = ['Same agency.', 'Same promise.', 'Two very different endings.'];
+  const k = Math.min(2, Math.floor(u / 1.3));
+  head(g, [words[k]], W / 2, 760, { size: TYPE.h3, align: 'center', alpha: fin(u - k * 1.3, 0, .35) });
+};
+S.team = (g, u, d, t) => {
+  const s = SET.orbit; only(s, 'earth'); s.earth.position.set(0, 0, 0); s.earth.scale.setScalar(1); faceLatLon(s.earth, 23.7, 90.4 + u * .6);
+  s.earth.userData.clouds.rotation.y = u * .004; s.sun.position.set(6, 1, -2);   // night side: city lights
+  orbitCam(s.cam, V3(0, 0, 0), 2.6 - u * .02, 0, 0); s.cam.lookAt(V3(.35, 0, 0)); shot(g, s);
+  shade(g, 'left', .85);
+  eyebrow(g, 'Team · Dhaka, Bangladesh', 120, 330, { alpha: fin(u, .1) });
+  head(g, ['Four people.', 'One question.'], 120, 460, { size: TYPE.h2, stagger: .4, u });
+  ['Developer', 'Researcher', 'Designer', 'Storyteller'].forEach((r, i) => chip(g, r, 120 + (i % 2) * 290, 640 + Math.floor(i / 2) * 60, true, t + i, fin(u, 3.3 + i * .55, .5)));
+};
+S.question = (g, u, d) => {
+  const s = SET.moon; s.lm.visible = false; s.cam.position.set(-8 + u * .35, 1.3, 14); s.cam.lookAt(V3(-4 + u * .35, .6, -10)); shot(g, s);
+  shade(g, 'center', .7);
+  eyebrow(g, 'The question we kept asking', W / 2, 400, { align: 'center', alpha: fin(u, .2) });
+  head(g, ['When a mission goes quiet,', 'where does its story go?'], W / 2, 520, { size: TYPE.h3, align: 'center', stagger: 1.7, u: u - 1.2 });
+};
+S.title = (g, u, d) => {
+  const s = SET.orbit; only(s, 'earth'); s.earth.scale.setScalar(1); s.earth.position.set(0, -1.32, 0); faceLatLon(s.earth, 10, 60 + u * .4); s.sun.position.set(-1, 1.2, -3);
+  s.cam.position.set(0, .12 + u * .004, 1.9); s.cam.lookAt(V3(0, .05, 0)); shot(g, s);
+  shade(g, 'center', .5);
+  eyebrow(g, 'NASA Space Apps · Hardware archive', W / 2, 330, { align: 'center', alpha: fin(u, .6) });
+  head(g, ['Abandoned,', 'but not forgotten.'], W / 2, 470, { size: TYPE.hero, align: 'center', stagger: .6, u: u - .8 });
+};
+S.hardware = (g, u, d, t) => {
+  const seg = d / 3, k = Math.min(2, Math.floor(u / seg)), v = u - k * seg;
+  if (k === 0) { const s = SET.moon; s.lm.visible = true; orbitCam(s.cam, s.lm.position, 6.5 - v * .2, .6 + v * .05, .18); shot(g, s); }
+  if (k === 1) { const s = SET.viking; s.m.rotation.set(.1, v * .2, 0); orbitCam(s.cam, V3(0, 0, 0), 4.8 - v * .1, .7, .25); shot(g, s); }
+  if (k === 2) { const s = SET.pioneer; s.m.rotation.set(.3, v * .15, .2); orbitCam(s.cam, V3(0, 0, 0), 5 - v * .1, -.6, .1); shot(g, s); }
+  shade(g, 'left', .7);
+  eyebrow(g, 'Since the 1960s', 120, 300, { alpha: fin(u, .1) });
+  head(g, [['The Moon', 'Mars', 'Deep space'][k]], 120, 420, { size: TYPE.h2, alpha: fin(v, 0, .45) });
+  eyebrow(g, ['Apollo Lunar Module descent stages · 1969–72', 'Viking landers · 1976', 'Pioneer 10 · launched 1972'][k], 120, 490, { alpha: fin(v, .2, .45), color: C.dust });
+};
+S.tabs = (g, u, d) => {
+  const s = SET.orbit; only(s, 'earth'); s.earth.position.set(.9, 0, 0); s.earth.scale.setScalar(1); faceLatLon(s.earth, 20, -30 + u * .8); s.sun.position.set(-5, 1.5, 3);
+  orbitCam(s.cam, V3(.3, 0, 0), 3.4, 0, 0); shot(g, s);
+  shade(g, 'left', .9);
+  head(g, ['The facts exist.', 'But they’re scattered.'], 120, 470, { size: TYPE.h2, stagger: 2.2, u });
+  ['Mission pages', 'Press releases', 'PDF reports'].forEach((x, i) => chip(g, x, 120 + i * 300, 680, false, 0, fin(u, 2.6 + i * .5, .4)));
+};
+S.word = (g, u, d) => {
+  const s = SET.moon; s.lm.visible = true; s.cam.position.set(9 - u * .25, 1.1, 6); s.cam.lookAt(V3(2, 1, -3)); shot(g, s);
+  shade(g, 'center', .6);
+  const cut = ease((u - 1.9) / .6);
+  g.save(); g.globalAlpha = 1 - cut * .5; head(g, ['Abandoned'], W / 2, 590, { size: 200, align: 'center', alpha: fin(u, .2, .6) }); g.restore();
+  g.fillStyle = C.cobalt; g.fillRect(W / 2 - 560, 520, 1120 * cut, 10);
+  eyebrow(g, 'The word that hides the truth', W / 2, 700, { align: 'center', alpha: fin(u, 1) });
+};
+S.causes = (g, u, d, t, L) => {
+  const sec = TL.lines[L.firstIdx + 1].start - L.start;
+  if (u < sec - .2) {
+    const s = SET.mars; s.dust.material.opacity = 0; s.sc.fog.density = .005; s.sky.material.uniforms.k.value = 0;
+    s.rover.position.set(0, .45, 0); orbitCam(s.cam, V3(0, .6, 0), 12 - u * .3, 1.2 + u * .02, .1); shot(g, s);
+    shade(g, 'left', .8);
+    head(g, ['Nobody drove', 'them home.'], 120, 440, { size: TYPE.h2, stagger: .4, u });
+    text(g, 'They worked until something stopped them.', 120, 640, { size: TYPE.lead, alpha: fin(u, 2.4) });
+    return;
+  }
+  const v = u - sec + .2, words = ['Dust', 'Cold', 'Fading power', 'Distance'], k = Math.min(3, Math.floor(v / .78)), w = v - k * .78;
+  if (k === 0) { const s = SET.mars; s.dust.material.opacity = .8; s.sc.fog.density = .03; s.sky.material.uniforms.k.value = .7; s.dust.rotation.y = v * .3; orbitCam(s.cam, V3(0, .8, 0), 4.5, 3.3 + v * .05, .1); shot(g, s); }
+  if (k === 1) { const s = SET.moon; s.lm.visible = false; s.cam.position.set(0, 2.2, 10); s.cam.lookAt(V3(-10, .8, -20)); shot(g, s); g.fillStyle = 'rgba(2,3,7,.35)'; g.fillRect(0, 0, W, H); }
+  if (k === 2) { const s = SET.insight; s.l.k.intensity = 2.6 * (1 - clamp(w / .8) * .85); s.m.rotation.set(.35, .6, 0); orbitCam(s.cam, V3(0, 0, 0), 3.4, .4, .5); shot(g, s); }
+  if (k === 3) { const s = SET.space; s.v.rotation.set(.2, .3, 0); orbitCam(s.cam, V3(0, 0, 0), 6 + w * 30, 2.4, .1); shot(g, s); }
+  shade(g, 'center', .55);
+  head(g, [words[k]], W / 2, 580, { size: TYPE.hero, align: 'center', alpha: fin(w, 0, .2) });
+};
+S.oppy = (g, u, d) => {
+  const s = SET.mars; s.dust.material.opacity = 0; s.sc.fog.density = .004; s.sky.material.uniforms.k.value = 0;
+  s.rover.position.x = -1 + u * .12; s.rover.position.y = heightAt(s.ground, s.rover.position.x, 0) + s.ground.position.y + .45;
+  orbitCam(s.cam, s.rover.position.clone().add(V3(0, .3, 0)), 4.2 - u * .08, .9 - u * .05, .1); shot(g, s);
+  shade(g, 'left', .8);
+  eyebrow(g, 'Opportunity · Designed for', 120, 330, { alpha: fin(u, .2) });
+  stat(g, '90 sols', 120, 440, { alpha: fin(u, .4) });
+  eyebrow(g, 'Actually worked', 120, 560, { alpha: fin(u, 3.2) });
+  const y = clamp((u - 3.4) / 2) * 14; stat(g, (y >= 14 ? '14+' : y.toFixed(1)) + ' years', 120, 670, { alpha: fin(u, 3.4) });
+  g.fillStyle = 'rgba(160,190,255,.12)'; g.fillRect(120, 720, 560, 6); g.fillStyle = '#55648c'; g.fillRect(120, 720, 560 * 90 / 5111, 6);
+  const gr = g.createLinearGradient(120, 0, 680, 0); gr.addColorStop(0, '#2f6bf0'); gr.addColorStop(1, '#9cbcff'); g.fillStyle = gr; g.globalAlpha = fin(u, 3.4); g.fillRect(120, 720, 560 * clamp((u - 3.4) / 2), 6); g.globalAlpha = 1;
+};
+S.storm = (g, u, d, t, L) => {
+  const sec = TL.lines[L.firstIdx + 1].start - L.start;
+  if (u < sec - .3) {
+    const k = clamp(u / 4.5), s = SET.mars; s.dust.material.opacity = .8 * k; s.dust.rotation.y = u * .2; s.sc.fog.density = .004 + k * .09; s.sky.material.uniforms.k.value = k; s.sun.intensity = 2.4 * (1 - k * .9); s.sp.material.opacity = 1 - k * .95;
+    s.sc.fog.color.setRGB(.54 * (1 - k * .3), .43 * (1 - k * .3), .35 * (1 - k * .3));
+    s.rover.position.set(0, .45, 0); orbitCam(s.cam, V3(0, .7, 0), 6 - u * .2, 2.0, .12); shot(g, s);
+    shade(g, 'left', .75);
+    eyebrow(g, '2018 · Planet-encircling dust storm', 120, 760, { alpha: fin(u, .3) });
+    eyebrow(g, 'Sunlight reaching the panels', 120, 820, { alpha: fin(u, .6), color: C.dust });
+    g.fillStyle = 'rgba(160,190,255,.12)'; g.fillRect(120, 845, 560, 6); g.fillStyle = C.signal; g.fillRect(120, 845, 560 * (1 - k * .97), 6);
+    return;
+  }
+  const v = u - sec + .3, s = SET.dsn; s.m.rotation.set(0, -.5 + v * .02, 0); s.l.k.intensity = 1.2; orbitCam(s.cam, V3(0, .1, 0), 3.6 - v * .06, -.9, .05); shot(g, s);
+  shade(g, 'left', .8);
+  eyebrow(g, 'Deep Space Network · Recovery commands sent', 120, 700, { alpha: fin(v, .2) });
+  const n = Math.floor(clamp(v / 4) * 1000); stat(g, n >= 1000 ? '1,000+' : n.toLocaleString('en-US'), 120, 810, { alpha: fin(v, .3) });
+  chip(g, 'Opportunity · No response', 120, 860, false, t, fin(v, 3));
+};
+S.why = (g, u, d) => {
+  const s = SET.orbit; only(s, 'mars'); s.mars.position.set(1.1, 0, 0); s.mars.scale.setScalar(1); faceLatLon(s.mars, -2, -6 + u * 2); s.sun.position.set(-4, 1, 2);
+  orbitCam(s.cam, V3(.4, 0, 0), 3.6, 0, 0); shot(g, s);
+  shade(g, 'left', .9);
+  const rows = [['Launch', 'Easy to find'], ['Arrival', 'Easy to find'], ['Last contact', 'Scattered'], ['Why it ended', 'Hardest to find']];
+  rows.forEach(([a, b], i) => {
+    const y = 330 + i * 110, al = fin(u, .3 + i * .55, .5), hi = i === 3;
+    card(g, 120, y - 50, 820, 88, al, hi);
+    text(g, a.toUpperCase(), 160, y + 8, { size: 34, weight: 600, color: hi ? C.white : C.dust, alpha: al, track: -1 });
+    text(g, b, 900, y + 6, { size: TYPE.chip + 3, weight: 500, color: hi ? C.signal : C.muted, alpha: al, align: 'right' });
+  });
+};
+S.tabs2 = (g, u, d) => {
+  const s = SET.orbit; only(s, 'earth'); s.earth.position.set(0, 0, 0); faceLatLon(s.earth, 23.7, 70 + u); s.sun.position.set(6, 1, -2);
+  orbitCam(s.cam, V3(0, 0, 0), 3.2 - u * .05, 0, 0); shot(g, s);
+  shade(g, 'center', .75);
+  const k = ease((u - 1.4) / .8);
+  head(g, [k < .5 ? '10 tabs.' : 'One place.'], W / 2, 560, { size: TYPE.hero, align: 'center', alpha: k < .5 ? 1 - k * 2 : (k - .5) * 2 });
+};
+const SITE_RECT = { x: 120, y: 150, w: 1680, h: 740 };
+S.site = (g, u, d, t, L) => {
+  // backdrop for a website recording (dropped in by compose.py); slow Earth drift behind it
+  const s = SET.orbit; only(s, 'earth'); s.earth.position.set(0, -1.2, 0); faceLatLon(s.earth, 5, 40 + t * .5); s.sun.position.set(-1, 1, -2);
+  s.cam.position.set(0, .2, 2.4); s.cam.lookAt(V3(0, 0, 0)); shot(g, s);
+  g.fillStyle = 'rgba(2,3,7,.55)'; g.fillRect(0, 0, W, H);
+  const R_ = SITE_RECT; g.save(); g.shadowColor = 'rgba(61,123,255,.35)'; g.shadowBlur = 80; g.fillStyle = C.void; g.fillRect(R_.x, R_.y, R_.w, R_.h); g.restore();
+  g.strokeStyle = 'rgba(160,190,255,.18)'; g.lineWidth = 1.4; g.strokeRect(R_.x - .5, R_.y - .5, R_.w + 1, R_.h + 1);
+  eyebrow(g, L.label, R_.x, R_.y - 30, { color: C.dust });
+};
+S.sources = (g, u, d, t, L) => {
+  const sec = TL.lines[L.firstIdx + 1].start - L.start;
+  const s = SET.dsn; s.m.rotation.set(0, .4 + u * .02, 0); s.l.k.intensity = 2.2; orbitCam(s.cam, V3(0, .1, 0), 4.4, .6, .15); s.cam.lookAt(V3(-2.0, .1, -.9)); shot(g, s);
+  shade(g, 'left', .88);
+  if (u < sec - .3) {
+    head(g, ['Every fact,', 'sourced.'], 120, 440, { size: TYPE.h2, stagger: .4, u });
+    ['NASA', 'JPL', 'NASA Science', 'Mission records'].forEach((x, i) => chip(g, x, 120 + (i % 2) * 290, 620 + Math.floor(i / 2) * 60, true, t + i, fin(u, 1 + i * .3, .4)));
+    return;
+  }
+  const v = u - sec + .3;
+  card(g, 120, 300, 560, 420, fin(v, 0)); card(g, 720, 300, 560, 420, fin(v, 1.2), true);
+  eyebrow(g, 'Fact', 160, 360, { alpha: fin(v, .1), color: C.signal });
+  text(g, 'Last contact', 160, 470, { size: TYPE.lead, alpha: fin(v, .2) }); stat(g, '10 June 2018', 160, 560, { size: 72, alpha: fin(v, .3) });
+  text(g, 'Source: NASA / JPL', 160, 670, { size: TYPE.chip + 2, color: C.muted, alpha: fin(v, .4) });
+  eyebrow(g, 'Creative interpretation', 760, 360, { alpha: fin(v, 1.3), color: C.signal });
+  text(g, '“My power is low and', 760, 470, { size: 40, weight: 300, color: '#c9d4f2', alpha: fin(v, 1.6), track: -1 });
+  text(g, 'it’s getting dark.”', 760, 520, { size: 40, weight: 300, color: '#c9d4f2', alpha: fin(v, 1.8), track: -1 });
+  text(g, 'Labelled, never a real transmission.', 760, 670, { size: TYPE.chip + 2, color: C.muted, alpha: fin(v, 3) });
+};
+S.student = (g, u, d) => {
+  const s = SET.moon; s.lm.visible = true; orbitCam(s.cam, s.lm.position, 7 - u * .15, -.8 + u * .04, .12); shot(g, s);
+  shade(g, 'left', .85);
+  const k = ease((u - 2.6) / 1);
+  head(g, ['From a list of dates'], 120, 420, { size: TYPE.h3, alpha: fin(u, .2) });
+  head(g, ['to stories with an ending', 'and a reason.'], 120, 520, { size: TYPE.h3, alpha: k });
+  ['1966', '1976', '2004', '2018'].forEach((y, i) => text(g, y, 120 + i * 150, 330, { size: TYPE.lead, weight: 600, color: C.muted, alpha: fin(u, i * .2) * (1 - k * .6) }));
+};
+S.offline = (g, u, d, t, L) => {
+  const sec = TL.lines[L.firstIdx + 1].start - L.start;
+  const s = SET.orbit; only(s, 'earth'); s.earth.position.set(.9, 0, 0); faceLatLon(s.earth, 23.7, 90.4 + u * .3); s.sun.position.set(6, 1, -2);
+  orbitCam(s.cam, V3(.3, 0, 0), 2.7 - u * .02, 0, 0); shot(g, s);
+  shade(g, 'left', .9);
+  if (u < sec - .3) {
+    eyebrow(g, 'Built with', 120, 330, { alpha: fin(u, .2) });
+    head(g, ['Plain HTML, CSS', 'and JavaScript.'], 120, 450, { size: TYPE.h2, stagger: .5, u });
+    ['No framework', 'No backend', 'Works offline'].forEach((x, i) => chip(g, x, 120 + i * 290, 650, i === 2, t, fin(u, 3.6 + i * .9, .4)));
+    return;
+  }
+  const v = u - sec + .3;
+  eyebrow(g, 'Bangladesh · A classroom with a weak connection', 120, 360, { alpha: fin(v, .1) });
+  head(g, ['It still opens.', 'That matters where we live.'], 120, 480, { size: TYPE.h3, stagger: 2.2, u: v });
+};
+S.needs = (g, u, d, t, L) => {
+  const s = SET.orbit; only(s, 'moon'); s.moon.position.set(1.9, 0, 0); s.moon.scale.setScalar(1); faceLatLon(s.moon, 0, u * 1.2); s.sun.position.set(-5, 1, 3);
+  orbitCam(s.cam, V3(.6, 0, 0), 4.2, 0, 0); shot(g, s);
+  shade(g, 'left', .92);
+  eyebrow(g, 'Version 1 · 15 missions', 120, 220, { alpha: fin(u, .2) });
+  head(g, ['To take it further,', 'we need three things.'], 120, 330, { size: TYPE.h3, stagger: .5, u });
+  [['Experts', 'to review and expand the archive'], ['NASA imagery', 'and 3D surface data'], ['A Bangla version', 'with teacher resources for schools']].forEach(([h, sub], i) => {
+    const st = TL.lines[L.firstIdx + 1 + i].start - L.start - .2, a = fin(u, st, .5), y = 520 + i * 140;
+    card(g, 120, y - 60, 900, 116, a);
+    text(g, String(i + 1).padStart(2, '0'), 160, y + 18, { size: 48, weight: 600, color: C.signal, alpha: a, track: -2 });
+    text(g, h.toUpperCase(), 270, y + 2, { size: 34, weight: 600, color: C.white, alpha: a, track: -1 });
+    text(g, sub, 270, y + 40, { size: TYPE.body, color: C.dust, alpha: a });
+  });
+};
+S.end = (g, u, d, t, L) => {
+  const l2 = TL.lines[L.firstIdx + 1].start - L.start, l3 = TL.lines[L.firstIdx + 2].start - L.start;
+  if (u < l3 - .4) {
+    const mid = W / 2, s = SET.space, m = SET.mars;
+    s.v.rotation.set(.25, -.4 + u * .03, .1); orbitCam(s.cam, V3(0, 0, 0), 5.2 + u * .1, -.4, .1); shot(g, s, { x: 0, y: 0, w: mid, h: H });
+    m.dust.material.opacity = 0; m.sc.fog.density = .006; m.sc.fog.color.setRGB(.54, .43, .35); m.sun.intensity = 1.2; m.sky.material.uniforms.k.value = 0; m.sp.material.opacity = .5;
+    m.rover.position.set(0, .45, 0); orbitCam(m.cam, V3(0, .7, 0), 6 + u * .1, 2.8, .14); shot(g, m, { x: mid, y: 0, w: mid, h: H });
+    g.fillStyle = C.void; g.fillRect(mid - 1, 0, 2, H);
+    chip(g, 'Voyager 1 · Still talking', 100, 110, true, t, fin(u, .2)); chip(g, 'Opportunity · Quiet', mid + 100, 110, false, t, fin(u, 1.6));
+    const a = fin(u, l2 - .2, .6); g.fillStyle = `rgba(2,3,7,${.55 * a})`; g.fillRect(0, 0, W, H);
+    head(g, ['Our job is to make sure', 'both are heard.'], W / 2, 500, { size: TYPE.h3, align: 'center', alpha: a });
+  } else {
+    const v = u - l3 + .4, s = SET.space; s.v.rotation.set(.2, .2 + v * .02, 0); orbitCam(s.cam, V3(0, 0, 0), 8 + v * 1.2, 2.6, .05); shot(g, s);
+    shade(g, 'center', .55);
+    head(g, ['Abandoned,', 'but not forgotten.'], W / 2, 460, { size: TYPE.hero, align: 'center', stagger: .5, u: v });
+    text(g, 'abandonedbutnotforgotten.netlify.app', W / 2, 660, { size: TYPE.lead, weight: 500, color: C.white, align: 'center', alpha: fin(v, 1.4) });
+    eyebrow(g, 'Team [Team Name] · [City], Bangladesh · NASA Space Apps Challenge', W / 2, 710, { align: 'center', alpha: fin(v, 1.8) });
+  }
+};
+
+// ---------- timeline / compositing ----------
+function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+function setup(tl) {
+  TL = tl; SCENES = [];
+  tl.lines.forEach((l, i) => {
+    const prev = SCENES[SCENES.length - 1];
+    if (prev && prev.key === l.scene) return;
+    const start = i === 0 ? 0 : l.start - .55;
+    if (prev) prev.end = start;
+    const [kind, label] = l.scene.startsWith('site:') ? ['site', l.scene.slice(5)] : [l.scene, ''];
+    SCENES.push({ key: l.scene, kind, label, slug: slug(label), start, firstIdx: i });
+  });
+  SCENES[SCENES.length - 1].end = tl.total;
+  return SCENES.filter(s => s.kind === 'site').map(s => ({ label: s.label, slug: s.slug, start: s.start, end: s.end, rect: SITE_RECT }));
+}
+function paint(g, sc, t) { g.save(); g.clearRect(0, 0, W, H); g.globalAlpha = 1; S[sc.kind](g, t - sc.start, sc.end - sc.start, t, sc); g.restore(); }
+const GRAIN = (() => { const c = new OffscreenCanvas(512, 512), g = c.getContext('2d'), d = g.createImageData(512, 512), r = rng(99); for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 10; } g.putImageData(d, 0, 0); return c; })();
+const XF = .6;
+function draw(t) {
+  let k = SCENES.findIndex(s => t >= s.start && t < s.end); if (k < 0) k = SCENES.length - 1;
+  const sc = SCENES[k], ga = bufA.getContext('2d'), gb = bufB.getContext('2d');
+  paint(ga, sc, t); out.globalAlpha = 1; out.drawImage(bufA, 0, 0);
+  if (k > 0 && t - sc.start < XF) { paint(gb, SCENES[k - 1], t); out.globalAlpha = 1 - ease((t - sc.start) / XF); out.drawImage(bufB, 0, 0); out.globalAlpha = 1; }
+  // letterbox-free cinematic vignette + bottom fade for captions
+  const v = out.createRadialGradient(W / 2, H / 2, H * .45, W / 2, H / 2, H * 1.05); v.addColorStop(0, 'rgba(2,3,7,0)'); v.addColorStop(1, 'rgba(2,3,7,.6)'); out.fillStyle = v; out.fillRect(0, 0, W, H);
+  const b = out.createLinearGradient(0, H, 0, H - 260); b.addColorStop(0, 'rgba(2,3,7,.7)'); b.addColorStop(1, 'rgba(2,3,7,0)'); out.fillStyle = b; out.fillRect(0, H - 260, W, 260);
+  const fo = clamp((TL.total - t) / 2.5) * clamp(t / .4 + .0001); if (fo < 1) { out.fillStyle = `rgba(0,0,0,${1 - fo})`; out.fillRect(0, 0, W, H); }
+  const o = (Math.floor(t * 24) * 137) % 512; out.save(); out.translate(-o, -((Math.floor(t * 24) * 271) % 512)); for (let x = 0; x < W + 512; x += 512) for (let y = 0; y < H + 512; y += 512) out.drawImage(GRAIN, x, y); out.restore();
+}
+window.__ready = (async () => {
+  await document.fonts.load('600 40px SG'); await document.fonts.load('500 40px SG'); await document.fonts.load('400 40px SG'); await document.fonts.load('300 40px SG');
+  for (const n of ['voyager', 'opportunity', 'lm', 'viking', 'pioneer', 'dsn', 'insight']) await loadModel(n);
+  await Promise.all(texP);
+  buildSets();
+  return Object.keys(MODELS);
+})();
+</script>
+</body></html>

@@ -1,6 +1,6 @@
-"""Mix voiceover + ambient score, drop in website captures, burn Space Grotesk captions.
+"""Mix voiceover + cinematic score, drop in website captures, burn word-highlight Space Grotesk captions.
 
-usage: python3 compose.py <base.mp4> <vo_dir> <out.mp4>
+usage: python3 compose.py <base.mp4> <vo_dir> <out.mp4> [captures_dir]
 Website captures: put video/captures/<slug>.mp4 (slugs in site_slots.json) and re-run;
 each is scaled into the on-screen browser frame for its time slot.
 """
@@ -20,35 +20,47 @@ def ts(t, sep='.'):
     return f'{h}:{m:02d}:{s:05.2f}' if sep == '.' else f'{h:02d}:{m:02d}:{s:06.3f}'.replace('.', ',')
 
 
-# ---- captions (.ass burned in, .srt for upload) ----
-ass = ["[Script Info]", "ScriptType: v4.00+", "PlayResX: 1920", "PlayResY: 1080", "WrapStyle: 0", "",
+# ---- captions: word-by-word highlight (.ass burned in), plus .srt for upload ----
+# colours from the website: unspoken = dust #a7b3cf, current = signal #6f9dff, spoken = white #eef3ff
+DUST, SIGNAL, WHITE = '&HCFB3A7&', '&HFF9D6F&', '&HFFF3EE&'
+words = json.load(open(f'{HERE}/words.json'))
+ass = ["[Script Info]", "ScriptType: v4.00+", "PlayResX: 1920", "PlayResY: 1080", "WrapStyle: 2", "",
        "[V4+ Styles]",
        "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-       "Style: Cap,Space Grotesk Medium,50,&H00FFFFFF,&H00FFFFFF,&H64000000,&H64000000,0,0,0,0,100,100,0.5,0,3,14,0,2,200,200,70,1",
+       "Style: Cap,Space Grotesk Medium,46,&H00FFF3EE,&H00FFF3EE,&H96020307,&H96020307,0,0,0,0,100,100,0,0,1,0,2,2,200,200,66,1",
        "", "[Events]", "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
+chunks = []   # list of [ {w, s, e} ... ] in absolute time
+for l, ws in zip(tl['lines'], words):
+    cur = []
+    for j, w in enumerate(ws):
+        cur.append({'w': w['w'].replace('"', ''), 's': l['start'] + w['start'], 'e': l['start'] + w['end']})
+        txt = ' '.join(x['w'] for x in cur)
+        last = j == len(ws) - 1
+        if last or len(txt) > 40 or (len(txt) >= 20 and w['w'][-1] in ',.:;?!'):
+            if not last and len(' '.join(x['w'] for x in ws[j + 1:][:3])) < 8 and len(ws) - j - 1 <= 1:
+                continue   # avoid a lonely last word
+            chunks.append(cur); cur = []
 srt = []
-caps = tl['captions']
-for i, c in enumerate(caps):
-    end = c['end']
-    # hold a caption until the next one if the gap is short, so text doesn't flicker
-    if i + 1 < len(caps) and caps[i + 1]['start'] - end < .6:
-        end = caps[i + 1]['start']
-    text = c['text'].replace('"', '“', 1).replace('"', '”', 1)
-    ass.append(f"Dialogue: 0,{ts(c['start'])},{ts(end)},Cap,,0,0,0,,{{\\fad(120,120)}}{text}")
-    srt += [str(i + 1), f"{ts(c['start'], ',')} --> {ts(end, ',')}", text, '']
+for ci, ch in enumerate(chunks):
+    end = ch[-1]['e'] + .25
+    if ci + 1 < len(chunks) and chunks[ci + 1][0]['s'] - end < .6:
+        end = chunks[ci + 1][0]['s']
+    for k, w in enumerate(ch):
+        a0 = w['s'] if k else ch[0]['s']
+        a1 = ch[k + 1]['s'] if k + 1 < len(ch) else end
+        if a1 <= a0: continue
+        parts = []
+        for m, x in enumerate(ch):
+            col = WHITE if m < k else SIGNAL if m == k else DUST
+            parts.append(f"{{\\c{col}}}{x['w']}")
+        ass.append(f"Dialogue: 0,{ts(a0)},{ts(a1)},Cap,,0,0,0,," + ' '.join(parts))
+    srt += [str(ci + 1), f"{ts(ch[0]['s'], ',')} --> {ts(end, ',')}", ' '.join(x['w'] for x in ch), '']
 open(f'{work}/captions.ass', 'w').write('\n'.join(ass) + '\n')
 open(f'{HERE}/captions.srt', 'w').write('\n'.join(srt))
 
-# ---- ambient score: low drone chord + filtered noise, synthesized ----
+# ---- cinematic score (music.py) ----
 score = f'{work}/score.wav'
-tones = [55, 82.41, 110, 130.81, 164.81]
-expr = '+'.join(f'{.22 / (k + 1):.3f}*sin(2*PI*{f}*t)*(0.6+0.4*sin(2*PI*{.03 + .017 * k:.3f}*t+{k}))' for k, f in enumerate(tones))
-subprocess.run(['ffmpeg', '-y', '-loglevel', 'error',
-                '-f', 'lavfi', '-i', f"aevalsrc='{expr}':s=48000:d={T}",
-                '-f', 'lavfi', '-i', f'anoisesrc=color=brown:amplitude=0.05:d={T}:r=48000',
-                '-filter_complex', f'[1]lowpass=f=400,volume=0.6[n];[0][n]amix=inputs=2:normalize=0,aecho=0.8:0.7:900|1400:0.3|0.2,'
-                f'afade=t=in:d=3,afade=t=out:st={T - 5}:d=5,volume=0.5,aformat=channel_layouts=stereo',
-                score], check=True)
+subprocess.run([sys.executable, f'{HERE}/music.py', str(T), score], check=True)
 
 # ---- voiceover track ----
 inputs, parts = [], []
@@ -58,7 +70,8 @@ for i, l in enumerate(tl['lines']):
     parts.append(f'[{i}]aresample=48000,aformat=channel_layouts=stereo,adelay={d}|{d}[v{i}]')
 n = len(tl['lines'])
 vo = f'{work}/voiceover.wav'
-fc = ';'.join(parts) + ';' + ''.join(f'[v{i}]' for i in range(n)) + f'amix=inputs={n}:normalize=0,apad=whole_dur={T}[o]'
+fc = ';'.join(parts) + ';' + ''.join(f'[v{i}]' for i in range(n)) + (f'amix=inputs={n}:normalize=0,highpass=f=75,equalizer=f=180:t=q:w=1:g=2,equalizer=f=3200:t=q:w=1.2:g=2.5,'
+      f'acompressor=threshold=0.12:ratio=3:attack=8:release=180:makeup=1.6,aecho=0.9:0.5:38|61:0.12|0.07,apad=whole_dur={T}[o]')
 subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', *inputs, '-filter_complex', fc, '-map', '[o]', '-t', str(T), vo], check=True)
 
 # ---- final: captures overlay + captions + ducked mix ----
@@ -81,7 +94,7 @@ for s in slots:
     last, k = f'[o{k}]', k + 1
     print('capture:', s['slug'])
 vf.append(f"{last}hqdn3d=4:3:8:6,ass={work}/captions.ass:fontsdir={HERE}/fonts[v]")
-af = ('[2]volume=0.9[m];[1]asplit=2[vo][sc];[m][sc]sidechaincompress=threshold=0.03:ratio=6:attack=40:release=600[md];'
+af = ('[2]volume=0.75[m];[1]asplit=2[vo][sc];[m][sc]sidechaincompress=threshold=0.03:ratio=6:attack=40:release=600[md];'
       '[vo][md]amix=inputs=2:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11[a]')
 cmd += ['-filter_complex', ';'.join(vf) + ';' + af, '-map', '[v]', '-map', '[a]',
         '-c:v', 'libx264', '-preset', 'medium', '-crf', '20', '-pix_fmt', 'yuv420p',
