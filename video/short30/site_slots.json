@@ -1,0 +1,26 @@
+[
+ {
+  "slug": "home-scroll",
+  "label": "Home scroll",
+  "start": 0,
+  "end": 0
+ },
+ {
+  "slug": "timeline-map",
+  "label": "Hardware map",
+  "start": 0,
+  "end": 0
+ },
+ {
+  "slug": "inspect-3d",
+  "label": "Inspect 3D",
+  "start": 0,
+  "end": 0
+ },
+ {
+  "slug": "mission-detective",
+  "label": "Mission Detective",
+  "start": 0,
+  "end": 0
+ }
+]

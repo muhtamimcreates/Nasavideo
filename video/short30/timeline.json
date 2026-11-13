@@ -1,0 +1,69 @@
+{
+ "total": 30.0,
+ "lines": [
+  {
+   "sec": "intro",
+   "at": 0.15,
+   "text": "I'm Mahi, Team Cosmic Eclipse, from Sylhet.",
+   "start": 0.1,
+   "end": 2.767,
+   "dur": 2.6666666666666665,
+   "scene": "intro"
+  },
+  {
+   "sec": "lead",
+   "at": 2.0,
+   "text": "When a NASA mission goes quiet, where does its story go?",
+   "start": 2.887,
+   "end": 6.001,
+   "dur": 3.1146666666666665,
+   "scene": "lead"
+  },
+  {
+   "sec": "name",
+   "at": 5.0,
+   "text": "Meet Abandoned, But Not Forgotten: fifteen missions, and why each one ended.",
+   "start": 6.121,
+   "end": 10.644,
+   "dur": 4.523,
+   "scene": "name"
+  },
+  {
+   "sec": "idea",
+   "at": 10.0,
+   "text": "Scroll the story, search the hardware map, turn a rover in 3D, or play Mission Detective.",
+   "start": 10.764,
+   "end": 16.524,
+   "dur": 5.76,
+   "scene": "idea"
+  },
+  {
+   "sec": "idea",
+   "at": null,
+   "text": "Every fact is from NASA and JPL, and it works offline.",
+   "start": 16.644,
+   "end": 20.505,
+   "dur": 3.861,
+   "scene": "idea"
+  },
+  {
+   "sec": "future",
+   "at": 20.0,
+   "text": "Next: expert review, more NASA data, and a Bangla version for schools.",
+   "start": 20.625,
+   "end": 25.084,
+   "dur": 4.459,
+   "scene": "future"
+  },
+  {
+   "sec": "future",
+   "at": null,
+   "text": "Voyager is still talking. Opportunity went quiet. We make sure both are heard.",
+   "start": 25.204,
+   "end": 29.663,
+   "dur": 4.458666666666667,
+   "scene": "future"
+  }
+ ],
+ "captions": []
+}
