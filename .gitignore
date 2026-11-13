@@ -5,3 +5,4 @@ kokoro.onnx
 voices.bin
 assets
 three
+*.zip
