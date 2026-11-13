@@ -15,10 +15,34 @@ const W = 1920, H = 1080;
 const cv = document.getElementById('c'), out = cv.getContext('2d');
 const bufA = new OffscreenCanvas(W, H), bufB = new OffscreenCanvas(W, H);
 let TL = null, SCENES = [];
+// palette = the website's tokens (void, hull, line, dust, white, rust/cobalt, signal, silent)
 const C = {
-  bg: '#04060b', ink: '#e9eef7', dim: '#8792a6', faint: '#3a4356',
-  green: '#46e39a', red: '#ff5b4d', amber: '#ffb547', mars: '#c8613a', marsDark: '#5a2414', blue: '#6fb7ff'
+  bg: '#020307', ink: '#eef3ff', dim: '#a7b3cf', faint: '#3a4566', muted: '#6c7a9c',
+  green: '#6f9dff', red: '#7e8fb8', amber: '#9cbcff', cobalt: '#3d7bff', blue: '#6f9dff'
 };
+const GRADE = 'grayscale(1) sepia(.9) hue-rotate(180deg) saturate(2.1) brightness(.78) contrast(1.15)';
+const TEX = {};
+for (const n of ['moon', 'mars', 'earthblue']) { const im = new Image(); im.src = 'tex/' + n + '.jpg'; TEX[n] = im; }
+// two-tone title like the site: periwinkle -> white gradient, uppercase, tight tracking
+function gtxt(g, s, x, y, { size = 96, weight = 600, align = 'center', alpha = 1, soft = false, track = -2 } = {}) {
+  g.save(); g.globalAlpha *= alpha * (soft ? .78 : 1); g.font = `${weight} ${size}px SG`; g.letterSpacing = track + 'px';
+  g.textAlign = align; g.textBaseline = 'middle';
+  const w = g.measureText(s).width, x0 = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  const gr = g.createLinearGradient(x0, y - size / 2, x0 + w, y + size / 2);
+  gr.addColorStop(0, '#86a3e8'); gr.addColorStop(.45, '#b9cbf2'); gr.addColorStop(1, '#f5f7ff');
+  g.fillStyle = gr; g.fillText(s, x, y); g.restore();
+}
+function texPlanet(g, name, x, y, r, rot = 0) {
+  const im = TEX[name]; g.save();
+  g.beginPath(); g.arc(x, y, r, 0, 7); g.clip();
+  g.filter = GRADE;
+  if (im.complete && im.naturalWidth) { const h = 2 * r, w = h * im.naturalWidth / im.naturalHeight, ox = ((rot * w) % w); g.drawImage(im, x - r - ox, y - r, w, h); g.drawImage(im, x - r - ox + w, y - r, w, h); }
+  g.filter = 'none';
+  const sh = g.createRadialGradient(x - r * .35, y - r * .35, r * .1, x - r * .2, y - r * .2, r * 1.3);
+  sh.addColorStop(0, 'rgba(255,255,255,.10)'); sh.addColorStop(.55, 'rgba(2,3,7,.05)'); sh.addColorStop(.85, 'rgba(2,3,7,.75)'); sh.addColorStop(1, 'rgba(2,3,7,.95)');
+  g.fillStyle = sh; g.fillRect(x - r, y - r, 2 * r, 2 * r); g.restore();
+  g.save(); g.shadowColor = 'rgba(61,123,255,.45)'; g.shadowBlur = 70; g.strokeStyle = 'rgba(160,190,255,.15)'; g.lineWidth = 1; g.beginPath(); g.arc(x, y, r, 0, 7); g.stroke(); g.restore();
+}
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const ease = x => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
 const eout = x => 1 - Math.pow(1 - clamp(x), 3);
@@ -115,12 +139,12 @@ function rover(g, x, y, s, col = '#1a0b06', dusty = 0) {
   g.fillRect(40, -110, 6, 62); g.fillRect(28, -122, 30, 14); // mast + head
   g.beginPath(); g.moveTo(-60, -10); g.lineTo(-30, -26); g.lineTo(0, -10); g.lineTo(30, -26); g.lineTo(60, -10); g.stroke();
   for (const wx of [-62, 0, 62]) { g.beginPath(); g.arc(wx, -2, 12, 0, 7); g.fill(); }
-  if (dusty) { g.fillStyle = `rgba(200,120,70,${dusty * .6})`; g.fillRect(-118, -52, 236, 8); }
+  if (dusty) { g.fillStyle = `rgba(120,150,220,${dusty * .5})`; g.fillRect(-118, -52, 236, 8); }
   g.restore();
 }
 function marsGround(g, t, { horizon = 720, dust = 0, sunA = 1 } = {}) {
   const sky = g.createLinearGradient(0, 0, 0, horizon);
-  sky.addColorStop(0, lerp(0, 1, dust) > .5 ? '#5c3020' : '#2a1610'); sky.addColorStop(1, '#a5674a');
+  sky.addColorStop(0, '#03060f'); sky.addColorStop(.6, '#0a1838'); sky.addColorStop(1, '#3a5290');
   g.fillStyle = sky; g.fillRect(0, 0, W, horizon);
   // sun
   g.save(); g.globalAlpha = sunA * (1 - dust * .92);
@@ -134,28 +158,28 @@ function marsGround(g, t, { horizon = 720, dust = 0, sunA = 1 } = {}) {
     const base = horizon - 60 + L * 45, amp = 60 - L * 15, ph = R() * 10;
     for (let x = 0; x <= W; x += 20) g.lineTo(x, base - amp * (.5 + .5 * Math.sin(x / (260 - L * 50) + ph)) * (.6 + .4 * Math.sin(x / 90 + ph)));
     g.lineTo(W, H); g.closePath();
-    g.fillStyle = ['#7a3d22', '#5e2c17', '#3f1c0e'][L]; g.fill();
+    g.fillStyle = ['#22346a', '#152450', '#0a1430'][L]; g.fill();
   }
   // rocks
   const R2 = rng(11);
   for (let i = 0; i < 70; i++) {
     const x = R2() * W, y = horizon + 40 + R2() * 340, r = 2 + R2() * 9 * (y - horizon) / 300;
-    g.fillStyle = 'rgba(25,10,5,.55)'; g.beginPath(); g.ellipse(x, y, r * 1.6, r, 0, 0, 7); g.fill();
+    g.fillStyle = 'rgba(2,3,7,.55)'; g.beginPath(); g.ellipse(x, y, r * 1.6, r, 0, 0, 7); g.fill();
   }
   if (dust > 0) {
     g.save(); g.globalAlpha = dust;
-    g.fillStyle = '#9a5a36'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#3d5490'; g.fillRect(0, 0, W, H);
     for (let i = 0; i < 6; i++) {
       const gx = ((t * (90 + i * 40) + i * 400) % (W + 1200)) - 600;
       const dg = g.createRadialGradient(gx, 400 + i * 80, 0, gx, 400 + i * 80, 520);
-      dg.addColorStop(0, 'rgba(70,32,16,.45)'); dg.addColorStop(1, 'rgba(70,32,16,0)');
+      dg.addColorStop(0, 'rgba(10,18,48,.5)'); dg.addColorStop(1, 'rgba(10,18,48,0)');
       g.fillStyle = dg; g.fillRect(0, 0, W, H);
     }
     g.restore();
   }
 }
 // grain for filmic texture
-const GRAIN = (() => { const c = new OffscreenCanvas(512, 512), g = c.getContext('2d'), d = g.createImageData(512, 512), r = rng(99); for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 14; } g.putImageData(d, 0, 0); return c; })();
+const GRAIN = (() => { const c = new OffscreenCanvas(512, 512), g = c.getContext('2d'), d = g.createImageData(512, 512), r = rng(99); for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 9; } g.putImageData(d, 0, 0); return c; })();
 function grain(g, t) { const ox = (Math.floor(t * 24) * 137) % 512, oy = (Math.floor(t * 24) * 271) % 512; g.save(); g.translate(-ox, -oy); for (let x = 0; x < W + 512; x += 512) for (let y = 0; y < H + 512; y += 512) g.drawImage(GRAIN, x, y); g.restore(); }
 function browser(g, x, y, w, h, { tabs = ['Mission page'], active = 0, url = 'nasa.gov', a = 1 } = {}) {
   g.save(); g.globalAlpha *= a;
@@ -195,14 +219,14 @@ S.signal = (g, u, d, t, L) => {
     // outgoing signal rings toward camera
     for (let i = 0; i < 4; i++) {
       const p = ((u * .35 + i / 4) % 1);
-      g.strokeStyle = `rgba(70,227,154,${(1 - p) * .55})`; g.lineWidth = 2;
+      g.strokeStyle = `rgba(111,157,255,${(1 - p) * .55})`; g.lineWidth = 2;
       g.beginPath(); g.arc(W * .62, H * .42, 20 + p * 900, 0, 7); g.stroke();
     }
     g.restore();
     signalTag(g, 80, 80, 'SIGNAL', u < 2.4 ? 'NONE' : 'RECEIVING', u < 2.4 ? C.red : C.green, t, fin(u, .2, .5));
     // title card at the head
     const ta = fin(u, .6, .8) * (1 - fin(u, 2.2, .6));
-    txt(g, 'ABANDONED, BUT NOT FORGOTTEN', W / 2, H / 2, { size: 56, weight: 700, track: 10, alpha: ta });
+    gtxt(g, 'ABANDONED, BUT NOT FORGOTTEN.', W / 2, H / 2, { size: 72, alpha: ta });
     if (u > 2.6) {
       const km = Math.round(24.9e9 + (u - 2.6) * 61000);
       mono(g, 'LAUNCHED 1977  ·  DISTANCE FROM EARTH', 120, 760, { align: 'left', alpha: fin(u, 3) });
@@ -211,7 +235,7 @@ S.signal = (g, u, d, t, L) => {
   } else {
     const u2 = u - (TL.lines[1].start - L.sceneStart) + .3;
     marsGround(g, t, { horizon: 700 });
-    rover(g, 980 + u2 * 4, 830, 1.1, '#140804', .6);
+    rover(g, 980 + u2 * 4, 830, 1.1, '#02040b', .6);
     vignette(g, .7);
     signalTag(g, 80, 80, 'SIGNAL', 'NONE', C.red, t, 1);
     mono(g, 'MARS  ·  LAST CONTACT', 120, 760, { align: 'left', alpha: fin(u2, .3) });
@@ -225,23 +249,23 @@ S.split = (g, u) => {
   const k = ease(u / 1.2), mid = W / 2;
   g.save(); g.beginPath(); g.rect(0, 0, mid, H); g.clip();
   stars(g, u, { drift: 4 }); probe(g, mid * .5, H * .44, 1.1, -.2);
-  for (let i = 0; i < 3; i++) { const p = ((u * .4 + i / 3) % 1); g.strokeStyle = `rgba(70,227,154,${(1 - p) * .5})`; g.lineWidth = 2; g.beginPath(); g.arc(mid * .5, H * .44, 30 + p * 420, 0, 7); g.stroke(); }
+  for (let i = 0; i < 3; i++) { const p = ((u * .4 + i / 3) % 1); g.strokeStyle = `rgba(111,157,255,${(1 - p) * .5})`; g.lineWidth = 2; g.beginPath(); g.arc(mid * .5, H * .44, 30 + p * 420, 0, 7); g.stroke(); }
   g.restore();
   g.save(); g.beginPath(); g.rect(mid, 0, mid, H); g.clip(); g.translate(mid * .5, 0);
-  marsGround(g, u, { horizon: 640 }); rover(g, mid * .5 + 480, 760, .9, '#140804', .7);
+  marsGround(g, u, { horizon: 640 }); rover(g, mid * .5 + 480, 760, .9, '#02040b', .7);
   g.restore();
   g.fillStyle = '#000'; g.fillRect(mid - 2, 0, 4, H);
   g.save(); g.globalAlpha = k; g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, 0, W, H); g.restore();
   signalTag(g, mid / 2 - 190, 800, 'DEEP SPACE', 'TALKING', C.green, u, fin(u, .4));
   signalTag(g, mid + mid / 2 - 190, 800, 'MARS', 'SILENT', C.red, u, fin(u, .8));
   const words = ['Same agency.', 'Same promise.', 'Two very different endings.'];
-  words.forEach((w, i) => txt(g, w, W / 2, 200 + i * 0, { size: 58, weight: 700, alpha: fin(u, i * 1.25, .4) * (i < 2 ? 1 - fin(u, (i + 1) * 1.25, .3) : 1) }));
+  words.forEach((w, i) => gtxt(g, w.toUpperCase(), W / 2, 200, { size: 72, alpha: fin(u, i * 1.25, .4) * (i < 2 ? 1 - fin(u, (i + 1) * 1.25, .3) : 1) }));
   vignette(g, .5);
 };
 S.team = (g, u) => {
   bg(g); stars(g, u + 20, { alpha: .5, drift: 2 });
   mono(g, 'TEAM  ·  BANGLADESH', W / 2, 250, { size: 26, alpha: fin(u, 0) });
-  txt(g, 'Four people. One question.', W / 2, 330, { size: 64, weight: 700, alpha: fin(u, .3) });
+  gtxt(g, 'FOUR PEOPLE. ONE QUESTION.', W / 2, 330, { size: 76, alpha: fin(u, .3) });
   const roles = [['Developer', '</>'], ['Researcher', '◎'], ['Designer', '◆'], ['Storyteller', '“ ”']];
   roles.forEach(([r, ic], i) => {
     const x = W / 2 + (i - 1.5) * 330, y = 560, a = fin(u, 3.2 + i * .9, .5);
@@ -258,18 +282,18 @@ S.question = (g, u, d) => {
   const q1 = 'When a mission goes quiet,', q2 = 'where does its story go?';
   const n = Math.floor(clamp((u - 1.6) / 2.6) * (q1.length + q2.length));
   mono(g, 'THE QUESTION WE KEPT ASKING', W / 2, 340, { alpha: fin(u, .2) });
-  txt(g, q1.slice(0, n), W / 2, 470, { size: 76, weight: 700 });
-  txt(g, q2.slice(0, Math.max(0, n - q1.length)), W / 2, 570, { size: 76, weight: 700, color: C.amber });
-  if (Math.floor(u * 2) % 2 === 0) { const s = n < q1.length ? q1.slice(0, n) : q2.slice(0, n - q1.length); g.font = '700 76px SG'; const w = g.measureText(s).width; g.fillStyle = C.ink; g.fillRect(W / 2 + w / 2 + 8, n < q1.length ? 430 : 530, 5, 80); }
+  gtxt(g, q1.slice(0, n), W / 2, 470, { size: 84, track: -1 });
+  gtxt(g, q2.slice(0, Math.max(0, n - q1.length)), W / 2, 570, { size: 84, weight: 400, soft: true, track: -1 });
+  if (Math.floor(u * 2) % 2 === 0) { const s = n < q1.length ? q1.slice(0, n) : q2.slice(0, n - q1.length); g.font = '600 84px SG'; g.letterSpacing = '-1px'; const w = g.measureText(s).width; g.fillStyle = C.ink; g.fillRect(W / 2 + w / 2 + 8, n < q1.length ? 430 : 530, 5, 80); }
   vignette(g);
 };
 S.title = (g, u, d) => {
   bg(g, '#000'); stars(g, u + 80, { alpha: 1, drift: 2, zoom: 1 + u * .015 });
-  planet(g, W * .5, H * 1.55, 900, '#d17a4d', '#3a140a', { light: -.2, craters: 30, seed: 4 });
+  texPlanet(g, 'earthblue', W * .5, H * 1.55, 900, u * .004);
   const a = fin(u, 1.2, 1.2);
-  g.save(); g.shadowColor = 'rgba(255,181,71,.55)'; g.shadowBlur = 40 * a;
-  txt(g, 'Abandoned,', W / 2, 380, { size: 120, weight: 700, alpha: a });
-  txt(g, 'But Not Forgotten', W / 2, 510, { size: 120, weight: 700, alpha: fin(u, 1.7, 1.2), color: C.amber });
+  g.save(); g.shadowColor = 'rgba(61,123,255,.45)'; g.shadowBlur = 50 * a;
+  gtxt(g, 'ABANDONED,', W / 2, 380, { size: 132, alpha: a });
+  gtxt(g, 'BUT NOT FORGOTTEN.', W / 2, 510, { size: 132, weight: 400, soft: true, alpha: fin(u, 1.7, 1.2) });
   g.restore();
   mono(g, 'AN ARCHIVE OF NASA MISSIONS THAT WENT QUIET', W / 2, 620, { alpha: fin(u, 2.4) });
   vignette(g, .6);
@@ -282,8 +306,8 @@ S.hardware = (g, u, d) => {
     ['DEEP SPACE', 1400, 470, 0, '', '', 'Voyager · Pioneer', 4.2]];
   items.forEach(([n, x, y, r, c1, c2, sub, s]) => {
     const a = fin(u, s, .7); g.save(); g.globalAlpha = a; g.translate(0, (1 - a) * 40);
-    if (r) planet(g, x, y, r, c1, c2, { craters: n === 'MOON' ? 40 : 15, seed: x });
-    else { probe(g, x, y, 1.3, -.3); for (let i = 0; i < 3; i++) { const p = ((u * .4 + i / 3) % 1); g.strokeStyle = `rgba(111,183,255,${(1 - p) * .5})`; g.beginPath(); g.arc(x, y, 30 + p * 140, 0, 7); g.stroke(); } }
+    if (r) texPlanet(g, n === 'MOON' ? 'moon' : 'mars', x, y, r, u * .01);
+    else { probe(g, x, y, 1.3, -.3); for (let i = 0; i < 3; i++) { const p = ((u * .4 + i / 3) % 1); g.strokeStyle = `rgba(111,157,255,${(1 - p) * .5})`; g.beginPath(); g.arc(x, y, 30 + p * 140, 0, 7); g.stroke(); } }
     txt(g, n, x, y + 230, { size: 40, weight: 700, track: 6 });
     mono(g, sub.toUpperCase(), x, y + 280, { size: 18 });
     g.restore();
@@ -303,22 +327,22 @@ S.tabs = (g, u, d) => {
     const x = 180 + (i % 3) * 330 + Math.sin(i * 3) * 30, y = 120 + Math.floor(i / 3) * 210 + (i % 3) * 40;
     g.save(); g.globalAlpha = a; g.translate(x + 380, y + 260); g.rotate((i - 2.5) * .02); g.translate(-(x + 380), -(y + 260)); g.translate(0, (1 - a) * 50);
     browser(g, x, y, 760, 520, { tabs: [tab], url });
-    if (tab.endsWith('.pdf')) { pill(g, x + 40, y + 110, 680, 380, 6, '#e8e8e8'); docLines(g, x + 80, y + 150, 600, 12, i, 1); g.save(); g.filter = 'none'; g.restore(); g.fillStyle = 'rgba(0,0,0,.6)'; for (let k = 0; k < 12; k++) g.fillRect(x + 80, y + 150 + k * 26, (k % 7 === 0 ? 260 : 480 + (k * 37 % 120)), k % 7 === 0 ? 12 : 8); }
+    if (tab.endsWith('.pdf')) { pill(g, x + 40, y + 110, 680, 380, 6, '#b9c6e4'); docLines(g, x + 80, y + 150, 600, 12, i, 1); g.save(); g.filter = 'none'; g.restore(); g.fillStyle = 'rgba(0,0,0,.6)'; for (let k = 0; k < 12; k++) g.fillRect(x + 80, y + 150 + k * 26, (k % 7 === 0 ? 260 : 480 + (k * 37 % 120)), k % 7 === 0 ? 12 : 8); }
     else docLines(g, x + 50, y + 120, 640, 14, i + 9, 1);
     g.restore();
   });
   const pa = fin(u, d - 2.4, .5);
   g.save(); g.globalAlpha = pa; g.fillStyle = 'rgba(4,6,11,.7)'; g.fillRect(0, 0, W, H); g.restore();
-  txt(g, 'The facts exist.', W / 2, 430, { size: 72, weight: 700, alpha: pa });
-  txt(g, 'But they’re scattered.', W / 2, 530, { size: 72, weight: 700, color: C.amber, alpha: fin(u, d - 1.6, .5) });
+  gtxt(g, 'THE FACTS EXIST.', W / 2, 430, { size: 96, alpha: pa });
+  gtxt(g, 'BUT THEY’RE SCATTERED.', W / 2, 540, { size: 96, weight: 400, soft: true, alpha: fin(u, d - 1.6, .5) });
   vignette(g, .5);
 };
 S.word = (g, u, d) => {
   bg(g, '#000');
   const a = fin(u, .3, .6), cut = ease((u - 1.8) / .6);
   g.save(); g.translate(W / 2, H / 2 - 40); g.scale(1 + u * .02, 1 + u * .02);
-  txt(g, 'ABANDONED', 0, 0, { size: 190, weight: 700, track: 12, alpha: a * (1 - cut * .55) });
-  g.strokeStyle = C.red; g.lineWidth = 10; g.beginPath(); g.moveTo(-620, 8); g.lineTo(-620 + 1240 * cut, 8); g.stroke();
+  gtxt(g, 'ABANDONED', 0, 0, { size: 210, track: -4, alpha: a * (1 - cut * .55) });
+  g.strokeStyle = C.cobalt; g.lineWidth = 10; g.beginPath(); g.moveTo(-620, 8); g.lineTo(-620 + 1240 * cut, 8); g.stroke();
   g.restore();
   mono(g, 'THE WORD THAT HIDES THE TRUTH', W / 2, 700, { alpha: fin(u, 1) });
   vignette(g);
@@ -326,7 +350,7 @@ S.word = (g, u, d) => {
 S.causes = (g, u, d, t, L) => {
   bg(g); stars(g, u + 200, { alpha: .4, drift: 2 });
   const second = TL.lines[L.firstIdx + 1].start - L.sceneStart;
-  txt(g, 'Nobody drove them home.', W / 2, 230, { size: 64, weight: 700, alpha: fin(u, .2) });
+  gtxt(g, 'NOBODY DROVE THEM HOME.', W / 2, 230, { size: 76, alpha: fin(u, .2) });
   txt(g, 'They worked until something stopped them.', W / 2, 310, { size: 40, weight: 400, color: C.dim, alpha: fin(u, 2.4) });
   const cs = [['DUST', C.amber, 'dust'], ['COLD', C.blue, 'cold'], ['FADING POWER', C.green, 'power'], ['DISTANCE', '#c9a7ff', 'dist']];
   cs.forEach(([w, col, k], i) => {
@@ -345,7 +369,7 @@ S.causes = (g, u, d, t, L) => {
 };
 S.oppy = (g, u, d) => {
   marsGround(g, u, { horizon: 690 });
-  rover(g, 700 + u * 22, 840, 1.25, '#140804');
+  rover(g, 700 + u * 22, 840, 1.25, '#02040b');
   vignette(g, .6);
   g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(1180, 120, 620, 420);
   mono(g, 'OPPORTUNITY  ·  MER-B', 1220, 170, { align: 'left', color: C.ink, alpha: fin(u, .2) });
@@ -361,7 +385,7 @@ S.oppy = (g, u, d) => {
 S.storm = (g, u, d, t, L) => {
   const dust = clamp(u / 4.5);
   marsGround(g, u, { horizon: 690, dust });
-  rover(g, 900, 840, 1.25, '#140804', dust);
+  rover(g, 900, 840, 1.25, '#02040b', dust);
   vignette(g, .7);
   g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(100, 110, 640, 300);
   mono(g, '2018  ·  PLANET-ENCIRCLING DUST STORM', 130, 160, { align: 'left', color: C.amber });
@@ -380,7 +404,7 @@ S.why = (g, u) => {
   rows.forEach(([a, b, col], i) => {
     const y = 300 + i * 120, al = fin(u, .3 + i * .5, .4), hi = i === 3;
     g.save(); g.globalAlpha = al;
-    pill(g, 460, y - 45, 1000, 90, 14, hi ? 'rgba(255,181,71,.10)' : 'rgba(255,255,255,.03)', hi ? 'rgba(255,181,71,.55)' : 'rgba(255,255,255,.08)');
+    pill(g, 460, y - 45, 1000, 90, 14, hi ? 'rgba(61,123,255,.10)' : 'rgba(255,255,255,.03)', hi ? 'rgba(61,123,255,.55)' : 'rgba(255,255,255,.08)');
     txt(g, a, 510, y, { size: 40, weight: 700, align: 'left', color: hi ? C.amber : C.ink, track: 3 });
     mono(g, b.toUpperCase(), 1410, y, { align: 'right', color: hi ? C.amber : C.dim });
     g.restore();
@@ -393,20 +417,20 @@ S.tabs2 = (g, u, d) => {
   const tabs = k < .5 ? ['Mission page', 'Press release', 'report.pdf', 'Timeline', 'Status update', 'Wikipedia', 'Fact sheet', 'Image archive', 'Final report.pdf', 'News'] : ['Abandoned, But Not Forgotten'];
   browser(g, 260, 200, 1400, 640, { tabs, url: k < .5 ? 'ten tabs later…' : 'one place for every story', active: 0 });
   if (k < .5) docLines(g, 320, 330, 1200, 16, 3, 1 - k * 2);
-  else { txt(g, 'One place.', W / 2, 520, { size: 96, weight: 700, alpha: (k - .5) * 2 }); }
+  else { gtxt(g, 'ONE PLACE.', W / 2, 520, { size: 120, alpha: (k - .5) * 2 }); }
   txt(g, k < .5 ? '10 tabs' : '1 tab', W / 2, 140, { size: 40, weight: 700, color: k < .5 ? C.red : C.green });
   vignette(g, .5);
 };
 S.site = (g, u, d, t, L) => {
   // placeholder frame for a screen recording of the website (replace via captures/<slug>.mp4)
   bg(g, '#05070c'); stars(g, t, { alpha: .35, drift: 1.5 });
-  const R = SITE_RECT, z = 1 + u * .004;
+  const R = SITE_RECT, z = 1;
   g.save(); g.translate(W / 2, H / 2); g.scale(z, z); g.translate(-W / 2, -H / 2);
-  browser(g, R.x, R.y - 92, R.w, R.h + 92, { tabs: ['Abandoned, But Not Forgotten'], url: 'abandoned-but-not-forgotten  ›  ' + L.label.toLowerCase() });
+  browser(g, R.x, R.y - 92, R.w, R.h + 92, { tabs: ['Abandoned, But Not Forgotten'], url: 'abandonedbutnotforgotten.netlify.app' });
   g.fillStyle = '#0a0d14'; g.fillRect(R.x, R.y, R.w, R.h);
   g.setLineDash([14, 12]); g.strokeStyle = 'rgba(255,255,255,.18)'; g.lineWidth = 2; g.strokeRect(R.x + 30, R.y + 30, R.w - 60, R.h - 60); g.setLineDash([]);
   mono(g, 'WEBSITE SCREEN RECORDING', W / 2, R.y + R.h / 2 - 70, { size: 22, color: C.amber });
-  txt(g, L.label, W / 2, R.y + R.h / 2, { size: 64, weight: 700 });
+  gtxt(g, L.label.toUpperCase(), W / 2, R.y + R.h / 2, { size: 72 });
   mono(g, 'DROP CAPTURE INTO  video/captures/' + L.slug + '.mp4', W / 2, R.y + R.h / 2 + 70, { size: 16 });
   g.restore();
   // lower-third feature label (stays on top of capture via compose step too)
@@ -415,16 +439,16 @@ S.sources = (g, u, d, t, L) => {
   bg(g); stars(g, u + 400, { alpha: .4, drift: 2 });
   const second = TL.lines[L.firstIdx + 1].start - L.sceneStart;
   const a1 = fin(u, .2) * (1 - fin(u, second - .4, .4));
-  txt(g, 'Every fact, sourced.', W / 2, 300, { size: 72, weight: 700, alpha: a1 });
+  gtxt(g, 'EVERY FACT, SOURCED.', W / 2, 300, { size: 96, alpha: a1 });
   ['NASA', 'JPL', 'NASA SCIENCE', 'NSSDCA', 'MISSION REPORTS'].forEach((s, i) => {
     const x = W / 2 + (i - 2) * 300, a = fin(u, .8 + i * .3, .4) * (1 - fin(u, second - .4, .4));
-    g.save(); g.globalAlpha = a; pill(g, x - 130, 470, 260, 80, 40, 'rgba(111,183,255,.08)', 'rgba(111,183,255,.5)'); txt(g, s, x, 511, { size: 26, weight: 700, color: C.blue, track: 2 }); g.restore();
+    g.save(); g.globalAlpha = a; pill(g, x - 130, 470, 260, 80, 40, 'rgba(111,157,255,.08)', 'rgba(111,157,255,.5)'); txt(g, s, x, 511, { size: 26, weight: 700, color: C.blue, track: 2 }); g.restore();
   });
   // fact vs creative interpretation
   const b = fin(u, second, .6), u2 = u - second;
   g.save(); g.globalAlpha = b;
-  pill(g, 260, 260, 640, 420, 22, 'rgba(70,227,154,.06)', 'rgba(70,227,154,.5)');
-  pill(g, 1020, 260, 640, 420, 22, 'rgba(255,181,71,.06)', 'rgba(255,181,71,.5)');
+  pill(g, 260, 260, 640, 420, 22, 'rgba(111,157,255,.06)', 'rgba(111,157,255,.5)');
+  pill(g, 1020, 260, 640, 420, 22, 'rgba(61,123,255,.06)', 'rgba(61,123,255,.5)');
   mono(g, 'FACT', 580, 320, { color: C.green, size: 24 });
   txt(g, 'Last contact:', 580, 430, { size: 38, weight: 500 }); txt(g, '10 June 2018', 580, 490, { size: 52, weight: 700 });
   mono(g, 'SOURCE  ·  NASA / JPL', 580, 600, { size: 18 });
@@ -468,7 +492,7 @@ S.offline = (g, u, d, t, L) => {
 S.needs = (g, u, d, t, L) => {
   bg(g); stars(g, u + 700, { alpha: .35, drift: 2 });
   mono(g, 'VERSION 1  ·  15 MISSIONS', W / 2, 170, { size: 24, alpha: fin(u, .2) });
-  txt(g, 'To take it further, we need:', W / 2, 250, { size: 60, weight: 700, alpha: fin(u, .5) });
+  gtxt(g, 'TO TAKE IT FURTHER, WE NEED:', W / 2, 250, { size: 72, alpha: fin(u, .5) });
   const items = [['Experts', 'to review and expand the archive'], ['NASA imagery', 'and 3D surface data'], ['A Bangla version', 'with teacher resources for schools']];
   items.forEach(([h, s], i) => {
     const st = TL.lines[L.firstIdx + 1 + i].start - L.sceneStart - .2, a = fin(u, st, .5), y = 420 + i * 170;
@@ -489,32 +513,32 @@ S.end = (g, u, d, t, L) => {
     g.save(); g.globalAlpha = sp;
     const mid = W / 2;
     g.save(); g.beginPath(); g.rect(0, 0, mid, H); g.clip(); stars(g, u, { drift: 3 }); probe(g, mid * .5, H * .45, 1.1, -.2);
-    for (let i = 0; i < 3; i++) { const p = ((u * .4 + i / 3) % 1); g.strokeStyle = `rgba(70,227,154,${(1 - p) * .5})`; g.lineWidth = 2; g.beginPath(); g.arc(mid * .5, H * .45, 30 + p * 420, 0, 7); g.stroke(); }
+    for (let i = 0; i < 3; i++) { const p = ((u * .4 + i / 3) % 1); g.strokeStyle = `rgba(111,157,255,${(1 - p) * .5})`; g.lineWidth = 2; g.beginPath(); g.arc(mid * .5, H * .45, 30 + p * 420, 0, 7); g.stroke(); }
     g.restore();
-    g.save(); g.beginPath(); g.rect(mid, 0, mid, H); g.clip(); g.translate(mid * .5, 0); marsGround(g, u, { horizon: 640 }); rover(g, mid * .5 + 480, 760, .9, '#140804', .7); g.restore();
+    g.save(); g.beginPath(); g.rect(mid, 0, mid, H); g.clip(); g.translate(mid * .5, 0); marsGround(g, u, { horizon: 640 }); rover(g, mid * .5 + 480, 760, .9, '#02040b', .7); g.restore();
     g.fillStyle = '#000'; g.fillRect(mid - 2, 0, 4, H);
     signalTag(g, mid / 2 - 190, 800, 'VOYAGER', 'TALKING', C.green, t, fin(u, .3));
     signalTag(g, mid + mid / 2 - 190, 800, 'OPPORTUNITY', 'QUIET', C.red, t, fin(u, 1.6));
     g.globalAlpha = sp * fin(u, l2 - .2, .6); g.fillStyle = 'rgba(0,0,0,.55)'; g.fillRect(0, 0, W, H);
-    txt(g, 'Our job is to make sure', W / 2, 420, { size: 64, weight: 700 });
-    txt(g, 'both are heard.', W / 2, 510, { size: 64, weight: 700, color: C.amber });
+    gtxt(g, 'OUR JOB IS TO MAKE SURE', W / 2, 420, { size: 80 });
+    gtxt(g, 'BOTH ARE HEARD.', W / 2, 515, { size: 80, weight: 400, soft: true });
     g.restore();
   }
   const ta = fin(u, l3 - .2, 1);
   if (ta > 0) {
     g.save(); g.globalAlpha = ta; stars(g, u, { alpha: 1, drift: 2 }); g.restore();
-    g.save(); g.shadowColor = 'rgba(255,181,71,.5)'; g.shadowBlur = 40;
-    txt(g, 'Abandoned,', W / 2, 360, { size: 110, weight: 700, alpha: ta });
-    txt(g, 'But Not Forgotten', W / 2, 480, { size: 110, weight: 700, color: C.amber, alpha: ta });
+    g.save(); g.shadowColor = 'rgba(61,123,255,.5)'; g.shadowBlur = 40;
+    gtxt(g, 'ABANDONED,', W / 2, 360, { size: 120, alpha: ta });
+    gtxt(g, 'BUT NOT FORGOTTEN.', W / 2, 480, { size: 120, weight: 400, soft: true, alpha: ta });
     g.restore();
-    mono(g, '[ SITE URL ]', W / 2, 610, { size: 28, color: C.ink, alpha: fin(u, l3 + 1.2) });
+    mono(g, 'abandonedbutnotforgotten.netlify.app', W / 2, 610, { size: 28, color: C.ink, track: 1, alpha: fin(u, l3 + 1.2) });
     mono(g, 'TEAM [TEAM NAME]  ·  [CITY], BANGLADESH', W / 2, 670, { size: 22, alpha: fin(u, l3 + 1.6) });
     mono(g, 'NASA SPACE APPS CHALLENGE', W / 2, 720, { size: 18, color: C.faint, alpha: fin(u, l3 + 2) });
   }
   vignette(g, .6);
 };
 
-const SITE_RECT = { x: 260, y: 192, w: 1400, h: 690 };
+const SITE_RECT = { x: 120, y: 150, w: 1680, h: 740 };
 function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
 function setup(tl) {
   TL = tl; SCENES = [];

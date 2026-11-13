@@ -8,6 +8,7 @@ import json, os, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 base, vo_dir, out = sys.argv[1:4]
+CAPS = sys.argv[4] if len(sys.argv) > 4 else f'{HERE}/captures'
 tl = json.load(open(f'{HERE}/timeline.json'))
 slots = json.load(open(f'{HERE}/site_slots.json'))
 T = tl['total']
@@ -64,20 +65,26 @@ subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', *inputs, '-filter_complex'
 cmd = ['ffmpeg', '-y', '-loglevel', 'error', '-i', base, '-i', vo, '-i', score]
 vf, last, k = [], '[0:v]', 3
 for s in slots:
-    f = f'{HERE}/captures/{s["slug"]}.mp4'
+    f = f'{CAPS}/{s["slug"]}.mp4'
     if not os.path.exists(f):
         continue
-    r, dur = s['rect'], s['end'] - s['start']
+    r, dur, a, e = s['rect'], s['end'] - s['start'], s['start'], s['end']
+    # fade with the scene cross-dissolve, except where two captures butt against each other
+    fades = ''
+    if not any(abs(o['end'] - a) < .05 for o in slots):
+        fades += f',fade=t=in:st={a:.3f}:d=0.5:alpha=1'
+    if not any(abs(o['start'] - e) < .05 for o in slots):
+        fades += f',fade=t=out:st={e - .5:.3f}:d=0.5:alpha=1'
     cmd += ['-stream_loop', '-1', '-t', f'{dur:.3f}', '-i', f]
-    vf.append(f'[{k}:v]scale={r["w"]}:{r["h"]}:force_original_aspect_ratio=increase,crop={r["w"]}:{r["h"]},setpts=PTS-STARTPTS+{s["start"]:.3f}/TB[c{k}]')
+    vf.append(f'[{k}:v]scale={r["w"]}:{r["h"]}:force_original_aspect_ratio=increase,crop={r["w"]}:{r["h"]},format=yuva420p,setpts=PTS-STARTPTS+{a:.3f}/TB{fades}[c{k}]')
     vf.append(f'{last}[c{k}]overlay={r["x"]}:{r["y"]}:eof_action=pass:enable=\'between(t,{s["start"]:.3f},{s["end"]:.3f})\'[o{k}]')
     last, k = f'[o{k}]', k + 1
     print('capture:', s['slug'])
-vf.append(f"{last}ass={work}/captions.ass:fontsdir={HERE}/fonts[v]")
+vf.append(f"{last}hqdn3d=4:3:8:6,ass={work}/captions.ass:fontsdir={HERE}/fonts[v]")
 af = ('[2]volume=0.9[m];[1]asplit=2[vo][sc];[m][sc]sidechaincompress=threshold=0.03:ratio=6:attack=40:release=600[md];'
       '[vo][md]amix=inputs=2:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11[a]')
 cmd += ['-filter_complex', ';'.join(vf) + ';' + af, '-map', '[v]', '-map', '[a]',
-        '-c:v', 'libx264', '-preset', 'medium', '-crf', '23', '-tune', 'grain', '-pix_fmt', 'yuv420p',
+        '-c:v', 'libx264', '-preset', 'medium', '-crf', '20', '-pix_fmt', 'yuv420p',
         '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-movflags', '+faststart', '-t', str(T), out]
 subprocess.run(cmd, check=True)
 print('wrote', out)
