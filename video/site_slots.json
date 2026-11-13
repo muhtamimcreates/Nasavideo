@@ -1,0 +1,110 @@
+[
+ {
+  "label": "Home",
+  "slug": "home",
+  "start": 107.001,
+  "end": 116.768,
+  "rect": {
+   "x": 260,
+   "y": 192,
+   "w": 1400,
+   "h": 690
+  }
+ },
+ {
+  "label": "Home scroll",
+  "slug": "home-scroll",
+  "start": 116.768,
+  "end": 124.593,
+  "rect": {
+   "x": 260,
+   "y": 192,
+   "w": 1400,
+   "h": 690
+  }
+ },
+ {
+  "label": "Timeline / Hardware map",
+  "slug": "timeline-hardware-map",
+  "start": 124.593,
+  "end": 130.797,
+  "rect": {
+   "x": 260,
+   "y": 192,
+   "w": 1400,
+   "h": 690
+  }
+ },
+ {
+  "label": "Final Signal",
+  "slug": "final-signal",
+  "start": 130.797,
+  "end": 144.214,
+  "rect": {
+   "x": 260,
+   "y": 192,
+   "w": 1400,
+   "h": 690
+  }
+ },
+ {
+  "label": "Inspect 3D",
+  "slug": "inspect-3d",
+  "start": 144.214,
+  "end": 148.11399999999998,
+  "rect": {
+   "x": 260,
+   "y": 192,
+   "w": 1400,
+   "h": 690
+  }
+ },
+ {
+  "label": "Mission Detective",
+  "slug": "mission-detective",
+  "start": 148.11399999999998,
+  "end": 156.83499999999998,
+  "rect": {
+   "x": 260,
+   "y": 192,
+   "w": 1400,
+   "h": 690
+  }
+ },
+ {
+  "label": "Compare · Quiz · 3D Game · Explore Mars",
+  "slug": "compare-quiz-3d-game-explore-mars",
+  "start": 156.83499999999998,
+  "end": 161.524,
+  "rect": {
+   "x": 260,
+   "y": 192,
+   "w": 1400,
+   "h": 690
+  }
+ },
+ {
+  "label": "About",
+  "slug": "about",
+  "start": 175.27499999999998,
+  "end": 177.511,
+  "rect": {
+   "x": 260,
+   "y": 192,
+   "w": 1400,
+   "h": 690
+  }
+ },
+ {
+  "label": "NASA Data",
+  "slug": "nasa-data",
+  "start": 201.015,
+  "end": 208.88299999999998,
+  "rect": {
+   "x": 260,
+   "y": 192,
+   "w": 1400,
+   "h": 690
+  }
+ }
+]

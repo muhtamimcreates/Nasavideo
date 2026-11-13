@@ -1,0 +1,275 @@
+1
+00:00:02,500 --> 00:00:06,842
+Right now, a machine built in 1977 is still sending
+
+2
+00:00:06,842 --> 00:00:10,759
+us messages from more than twenty-four billion
+
+3
+00:00:10,759 --> 00:00:12,121
+kilometres away.
+
+4
+00:00:13,537 --> 00:00:16,601
+And on Mars, another machine has said nothing
+
+5
+00:00:16,601 --> 00:00:18,166
+at all for eight years.
+
+6
+00:00:19,832 --> 00:00:23,779
+Same agency. Same promise. Two very different endings.
+
+7
+00:00:25,444 --> 00:00:27,385
+We're a team from Bangladesh.
+
+8
+00:00:28,801 --> 00:00:32,023
+We're a developer, a researcher, a designer and
+
+9
+00:00:32,023 --> 00:00:32,982
+a storyteller.
+
+10
+00:00:34,648 --> 00:00:37,940
+We kept asking one question: when a mission goes
+
+11
+00:00:37,940 --> 00:00:40,067
+quiet, where does its story go?
+
+12
+00:00:41,732 --> 00:00:44,697
+Our answer is a website called Abandoned,
+
+13
+00:00:44,697 --> 00:00:45,999
+But Not Forgotten.
+
+14
+00:00:46,798 --> 00:00:50,997
+Since the 1960s, NASA has left hardware on the
+
+15
+00:00:50,997 --> 00:00:54,009
+Moon, on Mars, and in deep space.
+
+16
+00:00:55,165 --> 00:00:58,452
+The facts exist. But they're scattered across
+
+17
+00:00:58,452 --> 00:01:01,373
+mission pages, press releases, and PDFs.
+
+18
+00:01:02,529 --> 00:01:05,686
+And one word hides the truth: “abandoned.”
+
+19
+00:01:06,842 --> 00:01:09,800
+Nobody drove these machines home. They worked
+
+20
+00:01:09,800 --> 00:01:11,706
+until something stopped them.
+
+21
+00:01:12,612 --> 00:01:15,599
+Dust. Cold. Fading power. Distance.
+
+22
+00:01:16,755 --> 00:01:20,207
+Opportunity was built to last ninety Martian days.
+
+23
+00:01:20,207 --> 00:01:22,899
+It worked for more than fourteen years.
+
+24
+00:01:24,055 --> 00:01:28,962
+Then, in 2018, a global dust storm blocked its sunlight.
+
+25
+00:01:29,868 --> 00:01:33,740
+Engineers sent more than a thousand recovery commands.
+
+26
+00:01:33,740 --> 00:01:35,031
+Nothing came back.
+
+27
+00:01:36,187 --> 00:01:39,489
+That's the part that matters most: why a mission
+
+28
+00:01:39,489 --> 00:01:42,310
+ended. And it's the part hardest to find.
+
+29
+00:01:43,466 --> 00:01:46,751
+A student shouldn't need ten tabs to understand it.
+
+30
+00:01:47,551 --> 00:01:51,688
+So we built one place for it. Fifteen missions,
+
+31
+00:01:51,688 --> 00:01:54,857
+from 1966 to today, across the Moon,
+
+32
+00:01:54,857 --> 00:01:56,618
+Mars and deep space.
+
+33
+00:01:57,318 --> 00:02:00,808
+Scroll the homepage, and the story unfolds scene
+
+34
+00:02:00,808 --> 00:02:04,443
+by scene, from leaving Earth to the final silence.
+
+35
+00:02:05,143 --> 00:02:07,645
+Follow six decades on the timeline,
+
+36
+00:02:07,645 --> 00:02:10,647
+or find every machine on the hardware map.
+
+37
+00:02:11,347 --> 00:02:15,165
+Our Final Signal page separates four moments most
+
+38
+00:02:15,165 --> 00:02:18,671
+people mix up: launch, arrival, last contact,
+
+39
+00:02:18,671 --> 00:02:20,757
+and official closure.
+
+40
+00:02:20,757 --> 00:02:24,064
+Because “lost” and "finished" are not the same thing.
+
+41
+00:02:24,764 --> 00:02:27,964
+Pick a spacecraft and turn it around in 3D.
+
+42
+00:02:28,664 --> 00:02:32,123
+Or play Mission Detective. Read the clues about
+
+43
+00:02:32,123 --> 00:02:34,698
+Spirit, Opportunity, or Surveyor 3,
+
+44
+00:02:34,698 --> 00:02:36,685
+and work out what happened.
+
+45
+00:02:37,385 --> 00:02:40,069
+There's a quiz, a mission comparison,
+
+46
+00:02:40,069 --> 00:02:41,374
+and a 3D game too.
+
+47
+00:02:42,074 --> 00:02:46,385
+Every fact comes from NASA and JPL sources.
+
+48
+00:02:46,385 --> 00:02:49,553
+And when a machine “speaks” in first person,
+
+49
+00:02:49,553 --> 00:02:52,937
+we label it clearly as creative interpretation,
+
+50
+00:02:52,937 --> 00:02:55,025
+never as a real transmission.
+
+51
+00:02:55,825 --> 00:02:57,361
+Why does this matter?
+
+52
+00:02:58,061 --> 00:03:01,333
+For a student, it turns space history from a list
+
+53
+00:03:01,333 --> 00:03:04,404
+of dates into a set of stories with an ending,
+
+54
+00:03:04,404 --> 00:03:05,272
+and a reason.
+
+55
+00:03:05,972 --> 00:03:10,177
+It's built with plain HTML, CSS, and JavaScript.
+
+56
+00:03:10,177 --> 00:03:15,446
+No framework, no backend, and most of it works offline.
+
+57
+00:03:15,446 --> 00:03:18,514
+So a classroom with a weak connection can still
+
+58
+00:03:18,514 --> 00:03:20,865
+open it. That matters where we live.
+
+59
+00:03:21,565 --> 00:03:24,504
+And it's honest. Sources are on the site,
+
+60
+00:03:24,504 --> 00:03:28,733
+and the line between fact and imagination is never blurred.
+
+61
+00:03:29,433 --> 00:03:32,418
+This is a first version, with fifteen missions.
+
+62
+00:03:32,418 --> 00:03:35,472
+To take it further, we need three things:
+
+63
+00:03:35,472 --> 00:03:38,695
+experts to review and expand the archive,
+
+64
+00:03:38,695 --> 00:03:43,284
+access to more NASA imagery and 3D surface data,
+
+65
+00:03:43,284 --> 00:03:46,297
+and a Bangla version, with teacher resources,
+
+66
+00:03:46,297 --> 00:03:48,105
+so schools here can use it.
+
+67
+00:03:50,205 --> 00:03:54,282
+Voyager is still talking. Opportunity went quiet.
+
+68
+00:03:54,282 --> 00:03:57,484
+Our job is to make sure both are heard.
+
+69
+00:03:57,484 --> 00:03:59,596
+Abandoned, But Not Forgotten.

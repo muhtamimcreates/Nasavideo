@@ -1,0 +1,200 @@
+[
+ {
+  "sec": "who",
+  "scene": "signal",
+  "text": "Right now, a machine built in 1977 is still sending us messages from more than twenty-four billion kilometres away."
+ },
+ {
+  "sec": "who",
+  "scene": "signal",
+  "text": "And on Mars, another machine has said nothing at all for eight years."
+ },
+ {
+  "sec": "who",
+  "scene": "split",
+  "text": "Same agency. Same promise. Two very different endings."
+ },
+ {
+  "sec": "who",
+  "scene": "team",
+  "text": "We're a team from Bangladesh.",
+  "placeholder": "I'm [Name], and this is Team [Team Name] from [City], Bangladesh."
+ },
+ {
+  "sec": "who",
+  "scene": "team",
+  "text": "We're a developer, a researcher, a designer and a storyteller."
+ },
+ {
+  "sec": "who",
+  "scene": "question",
+  "text": "We kept asking one question: when a mission goes quiet, where does its story go?"
+ },
+ {
+  "sec": "who",
+  "scene": "title",
+  "text": "Our answer is a website called Abandoned, But Not Forgotten."
+ },
+ {
+  "sec": "why",
+  "scene": "hardware",
+  "text": "Since the 1960s, NASA has left hardware on the Moon, on Mars, and in deep space."
+ },
+ {
+  "sec": "why",
+  "scene": "tabs",
+  "text": "The facts exist. But they're scattered across mission pages, press releases, and PDFs."
+ },
+ {
+  "sec": "why",
+  "scene": "word",
+  "text": "And one word hides the truth: \"abandoned.\""
+ },
+ {
+  "sec": "why",
+  "scene": "causes",
+  "text": "Nobody drove these machines home. They worked until something stopped them."
+ },
+ {
+  "sec": "why",
+  "scene": "causes",
+  "text": "Dust. Cold. Fading power. Distance.",
+  "say": "Dust... Cold... Fading power... Distance."
+ },
+ {
+  "sec": "why",
+  "scene": "oppy",
+  "text": "Opportunity was built to last ninety Martian days. It worked for more than fourteen years."
+ },
+ {
+  "sec": "why",
+  "scene": "storm",
+  "text": "Then, in 2018, a global dust storm blocked its sunlight."
+ },
+ {
+  "sec": "why",
+  "scene": "storm",
+  "text": "Engineers sent more than a thousand recovery commands. Nothing came back."
+ },
+ {
+  "sec": "why",
+  "scene": "why",
+  "text": "That's the part that matters most: why a mission ended. And it's the part hardest to find."
+ },
+ {
+  "sec": "why",
+  "scene": "tabs2",
+  "text": "A student shouldn't need ten tabs to understand it."
+ },
+ {
+  "sec": "what",
+  "scene": "site:Home",
+  "text": "So we built one place for it. Fifteen missions, from 1966 to today, across the Moon, Mars and deep space."
+ },
+ {
+  "sec": "what",
+  "scene": "site:Home scroll",
+  "text": "Scroll the homepage, and the story unfolds scene by scene, from leaving Earth to the final silence."
+ },
+ {
+  "sec": "what",
+  "scene": "site:Timeline / Hardware map",
+  "text": "Follow six decades on the timeline, or find every machine on the hardware map."
+ },
+ {
+  "sec": "what",
+  "scene": "site:Final Signal",
+  "text": "Our Final Signal page separates four moments most people mix up: launch, arrival, last contact, and official closure."
+ },
+ {
+  "sec": "what",
+  "scene": "site:Final Signal",
+  "text": "Because \"lost\" and \"finished\" are not the same thing."
+ },
+ {
+  "sec": "what",
+  "scene": "site:Inspect 3D",
+  "text": "Pick a spacecraft and turn it around in 3D."
+ },
+ {
+  "sec": "what",
+  "scene": "site:Mission Detective",
+  "text": "Or play Mission Detective. Read the clues about Spirit, Opportunity, or Surveyor 3, and work out what happened."
+ },
+ {
+  "sec": "what",
+  "scene": "site:Compare · Quiz · 3D Game · Explore Mars",
+  "text": "There's a quiz, a mission comparison, and a 3D game too."
+ },
+ {
+  "sec": "what",
+  "scene": "sources",
+  "text": "Every fact comes from NASA and JPL sources."
+ },
+ {
+  "sec": "what",
+  "scene": "sources",
+  "text": "And when a machine \"speaks\" in first person, we label it clearly as creative interpretation, never as a real transmission."
+ },
+ {
+  "sec": "next",
+  "scene": "site:About",
+  "text": "Why does this matter?"
+ },
+ {
+  "sec": "next",
+  "scene": "student",
+  "text": "For a student, it turns space history from a list of dates into a set of stories with an ending, and a reason."
+ },
+ {
+  "sec": "next",
+  "scene": "offline",
+  "text": "It's built with plain HTML, CSS, and JavaScript. No framework, no backend, and most of it works offline."
+ },
+ {
+  "sec": "next",
+  "scene": "offline",
+  "text": "So a classroom with a weak connection can still open it. That matters where we live."
+ },
+ {
+  "sec": "next",
+  "scene": "site:NASA Data",
+  "text": "And it's honest. Sources are on the site, and the line between fact and imagination is never blurred."
+ },
+ {
+  "sec": "next",
+  "scene": "needs",
+  "text": "This is a first version, with fifteen missions. To take it further, we need three things:"
+ },
+ {
+  "sec": "next",
+  "scene": "needs",
+  "text": "experts to review and expand the archive,"
+ },
+ {
+  "sec": "next",
+  "scene": "needs",
+  "text": "access to more NASA imagery and 3D surface data,"
+ },
+ {
+  "sec": "next",
+  "scene": "needs",
+  "text": "and a Bangla version, with teacher resources, so schools here can use it."
+ },
+ {
+  "sec": "next",
+  "scene": "end",
+  "text": "Voyager is still talking. Opportunity went quiet.",
+  "pre": 1.4
+ },
+ {
+  "sec": "next",
+  "scene": "end",
+  "text": "Our job is to make sure both are heard."
+ },
+ {
+  "sec": "next",
+  "scene": "end",
+  "text": "Abandoned, But Not Forgotten."
+ }
+]
