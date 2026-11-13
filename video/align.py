@@ -9,7 +9,7 @@ lines = json.load(open('/home/user/Nasavideo/video/script.json'))
 dec = Decoder(samprate=16000, bestpath=False, loglevel='FATAL')
 SPECIAL = {'1977': 'nineteen seventy seven', '1966': 'nineteen sixty six', '2018': 'twenty eighteen',
            '1960s': 'nineteen sixties', '3d': 'three d', 'jpl': 'j p l', 'html,': 'h t m l', 'css,': 'c s s',
-           'html': 'h t m l', 'css': 'c s s', 'pdfs.': 'p d fs', 'nasa': 'nasa', 'javascript.': 'java script', '3,': 'three', '3': 'three'}
+           'html': 'h t m l', 'css': 'c s s', 'pdfs.': 'p d fs', 'nasa': 'nasa', 'javascript.': 'java script', '3,': 'three', '3': 'three', 'md': 'mohammad'}
 
 def spoken(tok):
     t = tok.lower().strip('"“”.,:;?!')

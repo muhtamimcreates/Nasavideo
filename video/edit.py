@@ -93,11 +93,15 @@ SHOTS = [
         O('split_txt', '<div class="abs h3 shadow" style="left:0;right:0;top:760px;text-align:center">Same agency. Same promise.</div>', at=W(2, 'same') - .1),
         O('split_txt2', '<div class="abs h3 shadow" style="left:0;right:0;top:830px;text-align:center;color:var(--orange-b)">Two very different endings.</div>', at=W(2, 'two') - .1)]),
     dict(t0=C(3), base=V('earthnight', 46.4, 1.12, 1.2, .5, .75), ov=[
-        O('team', '<div class="left shadow"><div class="kicker">Team [Team Name]</div><div class="h2">[City],<br>Bangladesh</div>'
-          '<div class="sub">I’m [Name]</div></div>', t=.3)]),
+        O('team', '<div class="left shadow"><div class="kicker">Team Cosmic Eclipse</div><div class="h2">Sylhet,<br>Bangladesh</div>'
+          '<div class="sub">I’m Md Mahiyan Noor Mahi</div></div>', t=.3)]),
     dict(t0=C(4), base=V('earth4k', 1500, 1.0, 1.06), ov=[
-        O('roles', '<div class="left shadow"><div class="kicker">We are</div><div style="display:flex;gap:14px">' + ''.join(
-            f'<span class="sig" style="font-size:28px">{r}</span>' for r in ('a developer', 'a researcher', 'a designer', 'a storyteller')) + '</div></div>', t=.3)]),
+        O('team_k', '<div class="abs kicker shadow" style="left:120px;top:250px">Team Cosmic Eclipse</div>', t=.2)] + [
+        O(f'm{j}', f'<div class="abs card" style="left:{120 + (j % 3) * 560}px;top:{320 + (j // 3) * 230}px;width:520px;padding:30px 34px">'
+          f'<div class="kicker" style="color:var(--muted);font-size:22px">{role}</div><div class="h3" style="margin-top:10px">{name}</div></div>',
+          at=W(4, name.split()[0]) - .25, dy=24)
+        for j, (name, role) in enumerate([('Maliha', 'Team leader'), ('Nuhza', 'Designer'), ('Fatema', 'Data scientist'),
+                                          ('Omi', 'Developer'), ('Montaha', 'Researcher'), ('Mahi', 'Storyteller')])]),
     dict(t0=C(5), base=V('moonfly', 13.0, 1.0, 1.05), ov=[
         O('question', center('<div class="kicker">One question</div><div class="h2 grad" style="max-width:1500px">When a mission goes quiet,<br>where does its story go?</div>'), at=W(5, 'when') - .2)]),
     dict(t0=C(6), base=V('earth4k', 2000, 1.1, 1.16, .9, .3), ov=[
@@ -170,7 +174,7 @@ SHOTS = [
         O('end_sig', center('<span class="sig"><span class="dot"></span>Signal: none</span>', 'justify-content:flex-start;padding-top:230px'), t=.1, dy=0),
         O('end_title', center('<div class="h1 grad">Abandoned,<br>but not forgotten</div>'), t=.25, dy=30),
         O('end_url', center('<div class="sub" style="color:var(--white)">abandonedbutnotforgottenchallenge.netlify.app</div>'
-                            '<div class="kicker" style="font-size:22px">Team [Team Name] · [City], Bangladesh</div>', 'justify-content:flex-end;padding-bottom:150px'), t=1.4),
+                            '<div class="kicker" style="font-size:22px">Team Cosmic Eclipse · Sylhet, Bangladesh</div>', 'justify-content:flex-end;padding-bottom:150px'), t=1.4),
         O('end_credit', '<div class="abs" style="left:0;right:0;bottom:56px;text-align:center;font:400 18px SG;letter-spacing:-1px;color:var(--dim)">Footage and imagery: NASA / JPL-Caltech / GSFC / JSC / KSC. Planet textures and site: Abandoned, But Not Forgotten.</div>', t=1.8)]),
 ]
 SHOTS.sort(key=lambda s: s['t0'])

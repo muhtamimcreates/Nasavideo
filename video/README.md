@@ -1,6 +1,6 @@
 # Abandoned, But Not Forgotten — pitch video
 
-Documentary-style pitch video (4:00, 1920×1080, 30 fps) cut from public-domain NASA stock footage and stills
+Documentary-style pitch video (4:00.5, 1920×1080, 30 fps) cut from public-domain NASA stock footage and stills
 (NASA Image and Video Library), short screen recordings of the live website
 (abandonedbutnotforgottenchallenge.netlify.app), an AI voiceover, a synthesized space score and word-by-word
 highlighted captions. All type is Space Grotesk at -1px tracking; colours are the website's tokens
@@ -9,10 +9,10 @@ Voiceover lines with exact times: `voiceover_timestamps.md`.
 
 | Section | Time | Visuals |
 |---|---|---|
-| WHO | 0:00–0:45 | "Signal: none" on black, Voyager (artist concept) + 24 billion km, JPL team receiving Voyager data (2024), Opportunity (artist concept) "Signal: none", split screen, South Asia at night (team), Moon flyover (question), Earth limb + title |
-| WHY | 0:45–1:45 | Saturn V, Apollo 11, Opportunity's Cabo Frio pan, Voyager; browser tabs opening one by one; "Abandoned"; Apollo mission control; Dust / Cold / Fading power / Distance; 90 sols → 14+ years; 2018 dust storm (Mars before/after, dimming Sun); Goldstone + 1,000+ commands; Opportunity's last message ("No response"); traverse map; "10 tabs?" |
-| WHAT | 1:45–2:49 | Live-site recordings in a browser frame: Home, Home scroll, Timeline → Hardware Map, Final Signal (Opportunity), Inspect 3D, Mission Detective, Compare/Quiz/Game/Explore; sources + "creative interpretation" label |
-| SO WHAT NEXT | 2:49–4:00 | About, dates → stories, HTML/CSS/JS + offline, NASA Data, three asks (01/02/03), Voyager vs. Opportunity, end card |
+| WHO | 0:00–0:50 | "Signal: none" on black, Voyager (artist concept) + 24 billion km, JPL team receiving Voyager data (2024), Opportunity (artist concept) "Signal: none", split screen, South Asia at night (team), Moon flyover (question), Earth limb + title |
+| WHY | 0:50–1:47 | Saturn V, Apollo 11, Opportunity's Cabo Frio pan, Voyager; browser tabs opening one by one; "Abandoned"; Apollo mission control; Dust / Cold / Fading power / Distance; 90 sols → 14+ years; 2018 dust storm (Mars before/after, dimming Sun); Goldstone + 1,000+ commands; Opportunity's last message ("No response"); traverse map; "10 tabs?" |
+| WHAT | 1:47–2:51 | Live-site recordings in a browser frame: Home, Home scroll, Timeline → Hardware Map, Final Signal (Opportunity), Inspect 3D, Mission Detective, Compare/Quiz/Game/Explore; sources + "creative interpretation" label |
+| SO WHAT NEXT | 2:51–4:00 | About, dates → stories, HTML/CSS/JS + offline, NASA Data, three asks (01/02/03), Voyager vs. Opportunity, end card |
 
 ## Files
 
@@ -47,8 +47,7 @@ python3 edit.py work work/edit.mp4
 python3 compose.py work/edit.mp4 vo final.mp4 none
 ```
 
-## Placeholders to fill in
+## Team
 
-- The team line is spoken as "We're a team from Bangladesh." Re-record that line as
-  "I'm [Name], and this is Team [Team Name] from [City], Bangladesh." once the names are final.
-- On screen: `TEAM [TEAM NAME]`, `[CITY], BANGLADESH`, `I'M [NAME]` (team shot) and the end card — edit them in `edit.py`.
+Team Cosmic Eclipse, Sylhet, Bangladesh: Maliha (team leader), Nuhza (designer), Fatema (data scientist), Omi (developer),
+Montaha (researcher), Md Mahiyan Noor Mahi (storyteller, narrator line). "Md" is voiced as "Mohammad" (`say` in `script.json`).

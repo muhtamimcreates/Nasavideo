@@ -2,7 +2,7 @@
 import json, re, soundfile as sf, sys
 VO = sys.argv[1]
 lines = json.load(open('/home/user/Nasavideo/video/script.json'))
-windows = {'who': (2.5, 44.0), 'why': (44.8, 103.4), 'what': (104.2, 166.6), 'next': (167.4, 236.0)}
+windows = {'who': (2.0, 47.0), 'why': (47.4, 105.0), 'what': (105.4, 167.0), 'next': (167.4, 237.0)}
 for i, l in enumerate(lines):
     l['dur'] = sf.info(f'{VO}/{i:02d}.wav').duration
 out, prev_end = [], 0

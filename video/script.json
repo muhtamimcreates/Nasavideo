@@ -17,13 +17,13 @@
  {
   "sec": "who",
   "scene": "team",
-  "text": "We're a team from Bangladesh.",
-  "placeholder": "I'm [Name], and this is Team [Team Name] from [City], Bangladesh."
+  "text": "I'm Md Mahiyan Noor Mahi, and this is Team Cosmic Eclipse from Sylhet, Bangladesh.",
+  "say": "I'm Mohammad Mahiyan Noor Mahi, and this is Team Cosmic Eclipse, from Sylhet, Bangladesh."
  },
  {
   "sec": "who",
   "scene": "team",
-  "text": "We're a developer, a researcher, a designer and a storyteller."
+  "text": "My teammates are Maliha, team leader; Nuhza, designer; Fatema, data scientist; Omi, developer; Montaha, researcher; and finally, me, Mahi, the storyteller."
  },
  {
   "sec": "who",

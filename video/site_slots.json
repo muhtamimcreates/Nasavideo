@@ -2,55 +2,55 @@
  {
   "slug": "home",
   "label": "Home",
-  "start": 105.148,
-  "end": 115.038
+  "start": 106.75,
+  "end": 116.64
  },
  {
   "slug": "home-scroll",
   "label": "Home scroll",
-  "start": 115.038,
-  "end": 122.472
+  "start": 116.64,
+  "end": 124.074
  },
  {
   "slug": "timeline-map",
   "label": "Timeline / Hardware map",
-  "start": 122.472,
-  "end": 128.263
+  "start": 124.074,
+  "end": 129.865
  },
  {
   "slug": "final-signal",
   "label": "Final Signal",
-  "start": 128.263,
-  "end": 140.875
+  "start": 129.865,
+  "end": 142.477
  },
  {
   "slug": "inspect-3d",
   "label": "Inspect 3D",
-  "start": 140.875,
-  "end": 144.49
+  "start": 142.477,
+  "end": 146.092
  },
  {
   "slug": "mission-detective",
   "label": "Mission Detective",
-  "start": 144.49,
-  "end": 152.5
+  "start": 146.092,
+  "end": 154.102
  },
  {
   "slug": "montage",
   "label": "Compare \u00b7 Quiz \u00b7 3D Game \u00b7 Explore Mars",
-  "start": 152.5,
-  "end": 156.819
+  "start": 154.102,
+  "end": 158.421
  },
  {
   "slug": "about",
   "label": "About",
-  "start": 169.131,
-  "end": 172.234
+  "start": 170.733,
+  "end": 173.781
  },
  {
   "slug": "nasa-data",
   "label": "NASA Data",
-  "start": 196.165,
-  "end": 204.709
+  "start": 197.547,
+  "end": 206.036
  }
 ]
