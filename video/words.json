@@ -281,107 +281,107 @@
 {
 "w": "My",
 "start": 0.08,
-"end": 0.332
+"end": 0.333
 },
 {
 "w": "teammates",
-"start": 0.332,
-"end": 1.025
+"start": 0.333,
+"end": 1.029
 },
 {
-"w": "are",
-"start": 1.025,
-"end": 1.34
+"w": "are:",
+"start": 1.029,
+"end": 1.408
 },
 {
 "w": "Maliha,",
-"start": 1.34,
-"end": 1.907
+"start": 1.408,
+"end": 1.977
 },
 {
 "w": "team",
-"start": 1.907,
-"end": 2.285
+"start": 1.977,
+"end": 2.356
 },
 {
 "w": "leader;",
-"start": 2.285,
-"end": 2.852
+"start": 2.356,
+"end": 2.926
 },
 {
 "w": "Nuhza,",
-"start": 2.852,
-"end": 3.356
+"start": 2.926,
+"end": 3.432
 },
 {
 "w": "designer;",
-"start": 3.356,
-"end": 4.048
+"start": 3.432,
+"end": 4.127
 },
 {
 "w": "Fatema,",
-"start": 4.048,
-"end": 4.615
+"start": 4.127,
+"end": 4.696
 },
 {
 "w": "data",
-"start": 4.615,
-"end": 4.993
+"start": 4.696,
+"end": 5.076
 },
 {
 "w": "scientist;",
-"start": 4.993,
-"end": 5.749
+"start": 5.076,
+"end": 5.834
 },
 {
-"w": "Omi,",
-"start": 5.749,
-"end": 6.127
+"w": "Developer,",
+"start": 5.834,
+"end": 6.593
 },
 {
-"w": "developer;",
-"start": 6.127,
-"end": 6.883
+"w": "Omi;",
+"start": 6.593,
+"end": 6.973
 },
 {
 "w": "Montaha,",
-"start": 6.883,
-"end": 7.513
+"start": 6.973,
+"end": 7.605
 },
 {
 "w": "researcher;",
-"start": 7.513,
-"end": 8.332
+"start": 7.605,
+"end": 8.427
 },
 {
 "w": "and",
-"start": 8.332,
-"end": 8.647
+"start": 8.427,
+"end": 8.743
 },
 {
 "w": "finally,",
-"start": 8.647,
-"end": 9.277
+"start": 8.743,
+"end": 9.376
 },
 {
 "w": "me,",
-"start": 9.277,
-"end": 9.592
+"start": 9.376,
+"end": 9.692
 },
 {
 "w": "Mahi,",
-"start": 9.592,
-"end": 10.033
+"start": 9.692,
+"end": 10.135
 },
 {
 "w": "the",
-"start": 10.033,
-"end": 10.347
+"start": 10.135,
+"end": 10.451
 },
 {
 "w": "storyteller.",
-"start": 10.347,
-"end": 11.229
+"start": 10.451,
+"end": 11.336
 }
 ],
 [

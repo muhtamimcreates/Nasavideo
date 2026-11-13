@@ -2,49 +2,49 @@
  {
   "slug": "home",
   "label": "Home",
-  "start": 106.75,
-  "end": 116.64
+  "start": 106.749,
+  "end": 116.639
  },
  {
   "slug": "home-scroll",
   "label": "Home scroll",
-  "start": 116.64,
-  "end": 124.074
+  "start": 116.639,
+  "end": 124.073
  },
  {
   "slug": "timeline-map",
   "label": "Timeline / Hardware map",
-  "start": 124.074,
-  "end": 129.865
+  "start": 124.073,
+  "end": 129.864
  },
  {
   "slug": "final-signal",
   "label": "Final Signal",
-  "start": 129.865,
-  "end": 142.477
+  "start": 129.864,
+  "end": 142.476
  },
  {
   "slug": "inspect-3d",
   "label": "Inspect 3D",
-  "start": 142.477,
-  "end": 146.092
+  "start": 142.476,
+  "end": 146.091
  },
  {
   "slug": "mission-detective",
   "label": "Mission Detective",
-  "start": 146.092,
-  "end": 154.102
+  "start": 146.091,
+  "end": 154.101
  },
  {
   "slug": "montage",
   "label": "Compare \u00b7 Quiz \u00b7 3D Game \u00b7 Explore Mars",
-  "start": 154.102,
-  "end": 158.421
+  "start": 154.101,
+  "end": 158.42
  },
  {
   "slug": "about",
   "label": "About",
-  "start": 170.733,
+  "start": 170.732,
   "end": 173.781
  },
  {

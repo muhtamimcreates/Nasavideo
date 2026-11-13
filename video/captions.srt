@@ -39,239 +39,239 @@ and this is Team Cosmic Eclipse from Sylhet,
 Bangladesh.
 
 11
-00:00:27,861 --> 00:00:29,688
-My teammates are Maliha,
+00:00:27,861 --> 00:00:29,758
+My teammates are: Maliha,
 
 12
-00:00:29,688 --> 00:00:31,829
+00:00:29,758 --> 00:00:31,908
 team leader; Nuhza, designer;
 
 13
-00:00:31,829 --> 00:00:33,530
+00:00:31,908 --> 00:00:33,615
 Fatema, data scientist;
 
 14
-00:00:33,530 --> 00:00:35,294
-Omi, developer; Montaha,
+00:00:33,615 --> 00:00:35,386
+Developer, Omi; Montaha,
 
 15
-00:00:35,294 --> 00:00:37,058
+00:00:35,386 --> 00:00:37,157
 researcher; and finally,
 
 16
-00:00:37,058 --> 00:00:39,780
+00:00:37,157 --> 00:00:39,887
 me, Mahi, the storyteller.
 
 17
-00:00:39,780 --> 00:00:41,890
+00:00:39,887 --> 00:00:41,997
 We kept asking one question:
 
 18
-00:00:41,890 --> 00:00:43,410
+00:00:41,997 --> 00:00:43,517
 when a mission goes quiet,
 
 19
-00:00:43,410 --> 00:00:45,486
+00:00:43,517 --> 00:00:45,593
 where does its story go?
 
 20
-00:00:45,486 --> 00:00:48,216
+00:00:45,593 --> 00:00:48,323
 Our answer is a website called Abandoned,
 
 21
-00:00:48,216 --> 00:00:50,097
+00:00:48,323 --> 00:00:50,204
 But Not Forgotten.
 
 22
-00:00:50,097 --> 00:00:53,977
+00:00:50,204 --> 00:00:54,084
 Since the 1960s, NASA has left hardware on
 
 23
-00:00:53,977 --> 00:00:57,067
+00:00:54,084 --> 00:00:57,174
 the Moon, on Mars, and in deep space.
 
 24
-00:00:57,702 --> 00:01:00,342
+00:00:57,800 --> 00:01:00,440
 The facts exist. But they're scattered across
 
 25
-00:01:00,342 --> 00:01:02,452
+00:01:00,440 --> 00:01:02,550
 mission pages, press releases,
 
 26
-00:01:02,452 --> 00:01:03,622
+00:01:02,550 --> 00:01:03,720
 and PDFs.
 
 27
-00:01:04,262 --> 00:01:06,222
+00:01:04,351 --> 00:01:06,311
 And one word hides the truth:
 
 28
-00:01:06,222 --> 00:01:07,232
+00:01:06,311 --> 00:01:07,321
 abandoned.
 
 29
-00:01:07,900 --> 00:01:10,500
+00:01:07,980 --> 00:01:10,580
 Nobody drove these machines home.
 
 30
-00:01:10,500 --> 00:01:13,101
+00:01:10,580 --> 00:01:13,172
 They worked until something stopped them.
 
 31
-00:01:13,101 --> 00:01:14,483
+00:01:13,172 --> 00:01:14,545
 Dust.
 
 32
-00:01:14,483 --> 00:01:15,908
+00:01:14,545 --> 00:01:15,961
 Cold.
 
 33
-00:01:15,908 --> 00:01:17,781
+00:01:15,961 --> 00:01:17,825
 Fading power.
 
 34
-00:01:17,781 --> 00:01:18,811
+00:01:17,825 --> 00:01:18,855
 Distance.
 
 35
-00:01:19,584 --> 00:01:22,294
+00:01:19,619 --> 00:01:22,329
 Opportunity was built to last ninety Martian
 
 36
-00:01:22,294 --> 00:01:26,230
+00:01:22,329 --> 00:01:26,256
 days. It worked for more than fourteen years.
 
 37
-00:01:26,230 --> 00:01:30,120
+00:01:26,256 --> 00:01:30,146
 Then, in 2018, a global dust storm blocked
 
 38
-00:01:30,120 --> 00:01:31,410
+00:01:30,146 --> 00:01:31,427
 its sunlight.
 
 39
-00:01:31,410 --> 00:01:34,020
+00:01:31,427 --> 00:01:34,037
 Engineers sent more than a thousand recovery
 
 40
-00:01:34,020 --> 00:01:37,010
+00:01:34,037 --> 00:01:37,018
 commands. Nothing came back.
 
 41
-00:01:37,010 --> 00:01:39,030
+00:01:37,018 --> 00:01:39,038
 That's the part that matters most:
 
 42
-00:01:39,030 --> 00:01:40,580
+00:01:39,038 --> 00:01:40,588
 why a mission ended.
 
 43
-00:01:40,580 --> 00:01:42,930
+00:01:40,588 --> 00:01:42,938
 And it's the part hardest to find.
 
 44
-00:01:43,722 --> 00:01:46,712
+00:01:43,721 --> 00:01:46,711
 A student shouldn't need ten tabs to understand it.
 
 45
-00:01:47,350 --> 00:01:49,380
+00:01:47,349 --> 00:01:49,379
 So we built one place for it.
 
 46
-00:01:49,380 --> 00:01:53,000
+00:01:49,379 --> 00:01:52,999
 Fifteen missions, from 1966 to today,
 
 47
-00:01:53,000 --> 00:01:56,640
+00:01:52,999 --> 00:01:56,639
 across the Moon, Mars and deep space.
 
 48
-00:01:56,640 --> 00:01:58,350
+00:01:56,639 --> 00:01:58,349
 Scroll the homepage,
 
 49
-00:01:58,350 --> 00:02:01,100
+00:01:58,349 --> 00:02:01,099
 and the story unfolds scene by scene,
 
 50
-00:02:01,100 --> 00:02:04,074
+00:02:01,099 --> 00:02:04,073
 from leaving Earth to the final silence.
 
 51
-00:02:04,074 --> 00:02:06,744
+00:02:04,073 --> 00:02:06,743
 Follow six decades on the timeline,
 
 52
-00:02:06,744 --> 00:02:09,865
+00:02:06,743 --> 00:02:09,864
 or find every machine on the hardware map.
 
 53
-00:02:09,865 --> 00:02:12,665
+00:02:09,864 --> 00:02:12,664
 Our Final Signal page separates four moments
 
 54
-00:02:12,665 --> 00:02:15,155
+00:02:12,664 --> 00:02:15,154
 most people mix up: launch,
 
 55
-00:02:15,155 --> 00:02:17,215
+00:02:15,154 --> 00:02:17,214
 arrival, last contact,
 
 56
-00:02:17,215 --> 00:02:18,734
+00:02:17,214 --> 00:02:18,733
 and official closure.
 
 57
-00:02:18,734 --> 00:02:22,477
+00:02:18,733 --> 00:02:22,476
 Because lost and finished are not the same thing.
 
 58
-00:02:22,477 --> 00:02:26,092
+00:02:22,476 --> 00:02:26,091
 Pick a spacecraft and turn it around in 3D.
 
 59
-00:02:26,092 --> 00:02:28,102
+00:02:26,091 --> 00:02:28,101
 Or play Mission Detective.
 
 60
-00:02:28,102 --> 00:02:29,802
+00:02:28,101 --> 00:02:29,801
 Read the clues about Spirit,
 
 61
-00:02:29,802 --> 00:02:32,092
+00:02:29,801 --> 00:02:32,091
 Opportunity, or Surveyor 3,
 
 62
-00:02:32,092 --> 00:02:34,102
+00:02:32,091 --> 00:02:34,101
 and work out what happened.
 
 63
-00:02:34,102 --> 00:02:36,262
+00:02:34,101 --> 00:02:36,261
 There's a quiz, a mission comparison,
 
 64
-00:02:36,262 --> 00:02:38,421
+00:02:36,261 --> 00:02:38,420
 and a 3D game too.
 
 65
-00:02:38,421 --> 00:02:42,384
+00:02:38,420 --> 00:02:42,383
 Every fact comes from NASA and JPL sources.
 
 66
-00:02:42,384 --> 00:02:45,284
+00:02:42,383 --> 00:02:45,283
 And when a machine speaks in first person,
 
 67
-00:02:45,284 --> 00:02:48,594
+00:02:45,283 --> 00:02:48,593
 we label it clearly as creative interpretation,
 
 68
-00:02:48,594 --> 00:02:51,133
+00:02:48,593 --> 00:02:51,132
 never as a real transmission.
 
 69
-00:02:51,133 --> 00:02:52,593
+00:02:51,132 --> 00:02:52,592
 Why does this matter?
 
 70
@@ -335,37 +335,37 @@ with fifteen missions.
 To take it further, we need three things:
 
 85
-00:03:32,387 --> 00:03:35,097
+00:03:32,388 --> 00:03:35,098
 experts to review and expand the archive,
 
 86
-00:03:36,076 --> 00:03:39,956
+00:03:36,077 --> 00:03:39,957
 access to more NASA imagery and 3D surface data,
 
 87
-00:03:40,869 --> 00:03:42,059
+00:03:40,871 --> 00:03:42,061
 and a Bangla version,
 
 88
-00:03:42,059 --> 00:03:43,729
+00:03:42,061 --> 00:03:43,731
 with teacher resources,
 
 89
-00:03:43,729 --> 00:03:45,609
+00:03:43,731 --> 00:03:45,611
 so schools here can use it.
 
 90
-00:03:48,054 --> 00:03:50,044
+00:03:48,056 --> 00:03:50,046
 Voyager is still talking.
 
 91
-00:03:50,044 --> 00:03:51,814
+00:03:50,046 --> 00:03:51,816
 Opportunity went quiet.
 
 92
-00:03:52,607 --> 00:03:55,307
+00:03:52,610 --> 00:03:55,310
 Our job is to make sure both are heard.
 
 93
-00:03:56,363 --> 00:03:58,293
+00:03:56,366 --> 00:03:58,296
 Abandoned, But Not Forgotten.

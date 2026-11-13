@@ -99,7 +99,7 @@ SHOTS = [
         O('team_k', '<div class="abs kicker shadow" style="left:120px;top:250px">Team Cosmic Eclipse</div>', t=.2)] + [
         O(f'm{j}', f'<div class="abs card" style="left:{120 + (j % 3) * 560}px;top:{320 + (j // 3) * 230}px;width:520px;padding:30px 34px">'
           f'<div class="kicker" style="color:var(--muted);font-size:22px">{role}</div><div class="h3" style="margin-top:10px">{name}</div></div>',
-          at=W(4, name.split()[0]) - .25, dy=24)
+          at=W(4, 'developer' if name == 'Omi' else name) - .25, dy=24)
         for j, (name, role) in enumerate([('Maliha', 'Team leader'), ('Nuhza', 'Designer'), ('Fatema', 'Data scientist'),
                                           ('Omi', 'Developer'), ('Montaha', 'Researcher'), ('Mahi', 'Storyteller')])]),
     dict(t0=C(5), base=V('moonfly', 13.0, 1.0, 1.05), ov=[
