@@ -21,13 +21,13 @@ def ts(t, sep='.'):
 
 
 # ---- captions: word-by-word highlight (.ass burned in), plus .srt for upload ----
-# colours from the website: unspoken = dust #a7b3cf, current = signal #6f9dff, spoken = white #eef3ff
-DUST, SIGNAL, WHITE = '&HCFB3A7&', '&HFF9D6F&', '&HFFF3EE&'
+# colours from the website: unspoken = muted, current = mars orange, spoken = white; Space Grotesk at -1px tracking (Spacing -1)
+DUST, SIGNAL, WHITE = '&HA8938B&', '&H5A92E8&', '&HF9F4F2&'   # site tokens: muted #8b93a8, mars-orange-bright #e8925a, white #f2f4f9
 words = json.load(open(f'{HERE}/words.json'))
 ass = ["[Script Info]", "ScriptType: v4.00+", "PlayResX: 1920", "PlayResY: 1080", "WrapStyle: 2", "",
        "[V4+ Styles]",
        "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-       "Style: Cap,Space Grotesk Medium,46,&H00FFF3EE,&H00FFF3EE,&H96020307,&H96020307,0,0,0,0,100,100,0,0,1,0,2,2,200,200,66,1",
+       "Style: Cap,Space Grotesk Medium,46,&H00F9F4F2,&H00F9F4F2,&H960D0705,&H960D0705,0,0,0,0,100,100,-1,0,1,0,2,2,200,200,66,1",
        "", "[Events]", "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
 chunks = []   # list of [ {w, s, e} ... ] in absolute time
 for l, ws in zip(tl['lines'], words):
@@ -93,7 +93,7 @@ for s in slots:
     vf.append(f'{last}[c{k}]overlay={r["x"]}:{r["y"]}:eof_action=pass:enable=\'between(t,{s["start"]:.3f},{s["end"]:.3f})\'[o{k}]')
     last, k = f'[o{k}]', k + 1
     print('capture:', s['slug'])
-vf.append(f"{last}hqdn3d=4:3:8:6,ass={work}/captions.ass:fontsdir={HERE}/fonts[v]")
+vf.append(f"{last}noise=alls=5:allf=t,ass={work}/captions.ass:fontsdir={HERE}/fonts[v]")
 af = ('[2]volume=0.75[m];[1]asplit=2[vo][sc];[m][sc]sidechaincompress=threshold=0.03:ratio=6:attack=40:release=600[md];'
       '[vo][md]amix=inputs=2:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11[a]')
 cmd += ['-filter_complex', ';'.join(vf) + ';' + af, '-map', '[v]', '-map', '[a]',

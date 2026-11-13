@@ -1,11 +1,11 @@
 // Frame-exact screen captures of the website, one clip per slot in site_slots.json.
 // The page clock (performance.now, Date.now, rAF, timers, CSS/Web animations) is virtualised and advanced
 // 1/30 s per screenshot, so slow software WebGL still yields smooth 30 fps footage.
-// usage: THREE_DIR=<three pkg dir> node record_site.js <site_url> <out_dir> [slug,...]
+// usage: node record_site.js <site_url> <out_dir> [slug,...]
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), { spawn } = require('child_process');
 const BASE = process.argv[2], OUT = process.argv[3], ONLY = process.argv[4] ? process.argv[4].split(',') : null;
-const THREE = process.env.THREE_DIR, FPS = 30, VW = 1680, VH = 740;
+const THREE = process.env.THREE_DIR, FPS = 30, VW = 1600, VH = 900;
 const slots = Object.fromEntries(JSON.parse(fs.readFileSync(path.join(__dirname, 'site_slots.json'))).map(s => [s.slug, s.end - s.start]));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const ez = x => { x = Math.max(0, Math.min(1, x)); return x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; };
@@ -42,15 +42,17 @@ const VIRTUAL_CLOCK = `(() => {
 })();`;
 
 // a clip is a list of parts; each part loads a route fresh, then is captured frame by frame
-// part: { hash, dur (s) or share (fraction of slot), wait (ms load time), prep(p), scroll: [[t,y]...] (relative to start y), ev: [[t, fn]], each(p, t) }
+// part: { route, dur (s) or share (fraction of slot), wait (ms load time), prep(p), scroll: [[t,y]...] (relative to start y), ev: [[t, fn]], each(p, t) }
 const at = (t, fn) => [t, fn];
-const click = (sel, text) => async p => { const el = p.locator(sel, { hasText: text }).first(); if (await el.count()) await el.click({ timeout: 3000, force: true }).catch(e => console.log('click fail', sel, text)); };
-const scrollToSel = sel => async p => { await p.evaluate(sel => { const s = document.querySelector(sel); if (s) window.scrollTo({ top: s.getBoundingClientRect().top + scrollY - 110, behavior: 'instant' }); }, sel); };
-function dragOn(sel, t0, t1, dx, dy = 0) {
+const clickText = (text, sel = 'button, a, [role=button], label') => async p => { const el = p.locator(sel, { hasText: text }).first(); if (await el.count()) await el.click({ timeout: 3000, force: true }).catch(e => console.log('click fail', text)); else console.log('no', text); };
+const scrollToText = (text, off = 140) => async p => { await p.evaluate(([t, off]) => { const el = [...document.querySelectorAll('h1,h2,h3,button,label,p,div')].find(e => e.children.length < 3 && e.textContent.trim().startsWith(t)); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - off, behavior: 'instant' }); }, [text, off]); };
+const skipIntro = async p => { await clickText('Skip intro')(p); await sleep(1200); };
+const bigCanvas = async p => p.evaluate(() => { let best = null, A = 0; for (const c of document.querySelectorAll('canvas')) { const r = c.getBoundingClientRect(); if (r.width * r.height > A && r.width > 200) { A = r.width * r.height; best = { x: r.x, y: r.y, width: r.width, height: r.height }; } } return best; });
+function dragCanvas(t0, t1, dx, dy = 0) {
   let box = null, down = false;
   return async (p, t) => {
     if (t < t0 || (t > t1 && !down)) return;
-    if (!box) box = await p.locator(sel).first().boundingBox();
+    if (!box) box = await bigCanvas(p);
     if (!box) return;
     const cx = box.x + box.width / 2, cy = box.y + box.height / 2, k = Math.min(1, (t - t0) / (t1 - t0));
     if (!down) { await p.mouse.move(cx - dx / 2, cy); await p.mouse.down(); down = true; }
@@ -58,22 +60,23 @@ function dragOn(sel, t0, t1, dx, dy = 0) {
     if (k >= 1) { await p.mouse.up(); down = false; t1 = -1; }
   };
 }
+const selectMission = name => async p => { const s = p.locator('select').first(); if (await s.count()) { const v = await s.evaluate((el, n) => { const o = [...el.options].find(o => o.textContent.includes(n)); return o && o.value; }, name); if (v) await s.selectOption(v).catch(() => {}); } };
 const CLIPS = {
-  'home': [{ hash: 'home', wait: 6000, share: 1, scroll: [[4.4, 0], [8.2, 640]] }],
-  'home-scroll': [{ hash: 'home', wait: 6000, share: 1, prep: scrollToSel('.story'), scroll: [[.2, 0], [7.5, 2500]] }],
-  'timeline-hardware-map': [
-    { hash: 'timeline', wait: 3500, share: .5, prep: scrollToSel('.dec-tabs'), ev: [at(.5, click('.dtab', '1970s')), at(1.6, click('.dtab', '2000s'))] },
-    { hash: 'map', wait: 6000, share: .5, prep: scrollToSel('.map-ui'), each: dragOn('.map-stage canvas', .2, 2.9, 380, 40) }],
-  'final-signal': [{ hash: 'final-signal', wait: 3500, share: 1, scroll: [[2.4, 0], [6.4, 520], [8.0, 520], [12.2, 1100]] }],
-  'inspect-3d': [{ hash: 'inspect', wait: 7000, share: 1, prep: scrollToSel('.insp-pick'), each: dragOn('.insp-stage canvas', .2, 3.6, 520, -30) }],
-  'mission-detective': [{ hash: 'detective', wait: 3500, share: 1, scroll: [[2.2, 0], [3.8, 330]], ev: [at(4.8, click('.opt', 'Spirit')), at(6.1, click('.game-card button.cta', ''))] }],
-  'compare-quiz-3d-game-explore-mars': [
-    { hash: 'compare', wait: 3500, share: .25, scroll: [[.1, 0], [1.1, 300]] },
-    { hash: 'quiz', wait: 3500, share: .25, ev: [at(.5, click('.opt', 'Mars'))] },
-    { hash: 'game', wait: 7000, share: .25, prep: scrollToSel('.game-stage'), ev: [at(0, p => p.locator('.game-stage').first().focus().catch(() => {})), at(.05, p => p.keyboard.down('ArrowUp')), at(1.1, p => p.keyboard.up('ArrowUp'))] },
-    { hash: 'explore', wait: 7000, share: .25, prep: scrollToSel('.exp-tabs') }],
-  'about': [{ hash: 'about', wait: 3500, share: 1, scroll: [[.2, 0], [2.2, 240]] }],
-  'nasa-data': [{ hash: 'data', wait: 3500, share: 1, scroll: [[2.0, 0], [6.6, 700]] }],
+  'home': [{ route: '', wait: 2500, share: 1, ev: [at(5.6, clickText('Skip intro'))], scroll: [[7.0, 0], [9.8, 420]] }],
+  'home-scroll': [{ route: '', wait: 2500, share: 1, prep: skipIntro, scroll: [[.1, 300], [7.4, 4200]] }],
+  'timeline-map': [
+    { route: 'timeline', wait: 3000, share: .5, prep: scrollToText('Six decades', 120), ev: [at(.6, clickText('1970s')), at(1.7, clickText('2000s'))] },
+    { route: 'map', wait: 4000, share: .5, ev: [at(.7, clickText('Mars'))], scroll: [[1.2, 0], [2.9, 260]] }],
+  'final-signal': [{ route: 'final-signal', wait: 3000, share: 1, ev: [at(.8, selectMission('Opportunity'))], scroll: [[2.0, 0], [6.5, 600], [8.5, 600], [12.6, 1150]] }],
+  'inspect-3d': [{ route: 'inspect', wait: 7000, share: 1, each: dragCanvas(.1, 3.5, 560, -30) }],
+  'mission-detective': [{ route: 'detective', wait: 3000, share: 1, ev: [at(1.4, clickText('Start Game'))], scroll: [[2.4, 0], [5.0, 120]] }],
+  'montage': [
+    { route: 'compare', wait: 3000, share: .25, prep: scrollToText('Select', 300), ev: [at(.1, clickText('Spirit', '.compare-pick-item')), at(.5, clickText('Opportunity', '.compare-pick-item'))] },
+    { route: 'quiz', wait: 3000, share: .25, ev: [at(.4, clickText('Mars', '.quiz-option'))] },
+    { route: 'game', wait: 6000, share: .25 },
+    { route: 'explore', wait: 5000, share: .25 }],
+  'about': [{ route: 'about', wait: 3000, share: 1, scroll: [[.3, 0], [3.0, 380]] }],
+  'nasa-data': [{ route: 'data', wait: 3000, share: 1, scroll: [[1.5, 0], [8.0, 900]] }],
 };
 
 (async () => {
@@ -88,14 +91,16 @@ const CLIPS = {
       const ctx = await b.newContext({ viewport: { width: VW, height: VH } });
       const p = await ctx.newPage();
       await p.addInitScript(VIRTUAL_CLOCK);
+      await p.route(/\.netlify\/scripts/, r => r.abort());
+      await p.addInitScript(() => document.addEventListener('DOMContentLoaded', () => { const s = document.createElement('style'); s.textContent = '[class*=netlify i],[id*=netlify i]{display:none!important}'; document.head.appendChild(s); }));
       if (THREE) {
         await p.route(/three\.min\.js/, r => r.fulfill({ path: THREE + '/build/three.min.js', contentType: 'text/javascript' }));
         await p.route(/GLTFLoader\.js/, r => r.fulfill({ path: THREE + '/examples/js/loaders/GLTFLoader.js', contentType: 'text/javascript' }));
         await p.route(/DRACOLoader\.js/, r => r.fulfill({ path: THREE + '/examples/js/loaders/DRACOLoader.js', contentType: 'text/javascript' }));
       }
-      await p.goto(BASE + '#' + part.hash, { waitUntil: 'load' });
+      await p.goto(BASE.replace(/\/$/, '') + '/' + part.route, { waitUntil: 'load' });
       await sleep(part.wait);
-      await p.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+      if (part.route) await p.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
       if (part.prep) await part.prep(p);
       await sleep(400);
       const y0 = await p.evaluate(() => scrollY);

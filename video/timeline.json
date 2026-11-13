@@ -1,666 +1,704 @@
 {
- "total": 244.1,
+ "total": 240.0,
  "lines": [
   {
    "sec": "who",
    "scene": "signal",
    "text": "Right now, a machine built in 1977 is still sending us messages from more than twenty-four billion kilometres away.",
-   "dur": 9.621333333333334,
+   "dur": 9.194666666666667,
    "start": 2.5,
-   "end": 12.121
+   "end": 11.695
   },
   {
    "sec": "who",
    "scene": "signal",
    "text": "And on Mars, another machine has said nothing at all for eight years.",
-   "dur": 4.629333333333333,
-   "start": 13.537,
-   "end": 18.166
+   "dur": 4.458666666666667,
+   "start": 13.268,
+   "end": 17.726
   },
   {
    "sec": "who",
    "scene": "split",
    "text": "Same agency. Same promise. Two very different endings.",
-   "dur": 3.9466666666666668,
-   "start": 19.832,
-   "end": 23.778
+   "dur": 3.712,
+   "start": 19.549,
+   "end": 23.261
   },
   {
    "sec": "who",
    "scene": "team",
    "text": "We're a team from Bangladesh.",
    "placeholder": "I'm [Name], and this is Team [Team Name] from [City], Bangladesh.",
-   "dur": 1.9413333333333334,
-   "start": 25.444,
-   "end": 27.385
+   "dur": 1.8346666666666667,
+   "start": 25.084,
+   "end": 26.918
   },
   {
    "sec": "who",
    "scene": "team",
    "text": "We're a developer, a researcher, a designer and a storyteller.",
-   "dur": 4.181333333333333,
-   "start": 28.801,
-   "end": 32.982
+   "dur": 3.7973333333333334,
+   "start": 28.491,
+   "end": 32.288
   },
   {
    "sec": "who",
    "scene": "question",
    "text": "We kept asking one question: when a mission goes quiet, where does its story go?",
-   "dur": 5.418666666666667,
-   "start": 34.648,
-   "end": 40.066
+   "dur": 5.056,
+   "start": 34.111,
+   "end": 39.167
   },
   {
    "sec": "who",
    "scene": "title",
    "text": "Our answer is a website called Abandoned, But Not Forgotten.",
-   "dur": 4.266666666666667,
-   "start": 41.732,
-   "end": 45.998
+   "dur": 4.010666666666666,
+   "start": 40.99,
+   "end": 45.0
   },
   {
    "sec": "why",
    "scene": "hardware",
    "text": "Since the 1960s, NASA has left hardware on the Moon, on Mars, and in deep space.",
-   "dur": 7.210666666666667,
-   "start": 46.798,
-   "end": 54.009
+   "dur": 6.8053333333333335,
+   "start": 45.6,
+   "end": 52.405
   },
   {
    "sec": "why",
    "scene": "tabs",
    "text": "The facts exist. But they're scattered across mission pages, press releases, and PDFs.",
-   "dur": 6.208,
-   "start": 55.165,
-   "end": 61.373
+   "dur": 5.76,
+   "start": 53.447,
+   "end": 59.207
   },
   {
    "sec": "why",
    "scene": "word",
    "text": "And one word hides the truth: \"abandoned.\"",
-   "dur": 3.1573333333333333,
-   "start": 62.529,
-   "end": 65.686
+   "dur": 2.8373333333333335,
+   "start": 60.249,
+   "end": 63.086
   },
   {
    "sec": "why",
    "scene": "causes",
    "text": "Nobody drove these machines home. They worked until something stopped them.",
-   "dur": 4.864,
-   "start": 66.842,
-   "end": 71.706
+   "dur": 4.650666666666667,
+   "start": 64.128,
+   "end": 68.778
   },
   {
    "sec": "why",
    "scene": "causes",
-   "text": "Dust. Cold. Fading power. Distance.",
-   "say": "Dust... Cold... Fading power... Distance.",
-   "dur": 2.986666666666667,
-   "start": 72.612,
-   "end": 75.599
+   "text": "Dust.",
+   "dur": 0.832,
+   "start": 69.57,
+   "end": 70.402
+  },
+  {
+   "sec": "why",
+   "scene": "causes",
+   "text": "Cold.",
+   "dur": 0.8746666666666667,
+   "start": 71.194,
+   "end": 72.068
+  },
+  {
+   "sec": "why",
+   "scene": "causes",
+   "text": "Fading power.",
+   "dur": 1.3226666666666667,
+   "start": 72.86,
+   "end": 74.182
+  },
+  {
+   "sec": "why",
+   "scene": "causes",
+   "text": "Distance.",
+   "dur": 1.0026666666666666,
+   "start": 74.974,
+   "end": 75.976
   },
   {
    "sec": "why",
    "scene": "oppy",
    "text": "Opportunity was built to last ninety Martian days. It worked for more than fourteen years.",
-   "dur": 6.144,
-   "start": 76.755,
-   "end": 82.899
+   "dur": 5.8453333333333335,
+   "start": 77.018,
+   "end": 82.863
   },
   {
    "sec": "why",
    "scene": "storm",
    "text": "Then, in 2018, a global dust storm blocked its sunlight.",
-   "dur": 4.906666666666666,
-   "start": 84.055,
-   "end": 88.962
+   "dur": 4.629333333333333,
+   "start": 83.905,
+   "end": 88.534
   },
   {
    "sec": "why",
    "scene": "storm",
    "text": "Engineers sent more than a thousand recovery commands. Nothing came back.",
-   "dur": 5.1626666666666665,
-   "start": 89.868,
-   "end": 95.031
+   "dur": 4.8,
+   "start": 89.326,
+   "end": 94.126
   },
   {
    "sec": "why",
    "scene": "why",
    "text": "That's the part that matters most: why a mission ended. And it's the part hardest to find.",
-   "dur": 6.1226666666666665,
-   "start": 96.187,
-   "end": 102.31
+   "dur": 5.781333333333333,
+   "start": 95.168,
+   "end": 100.949
   },
   {
    "sec": "why",
    "scene": "tabs2",
    "text": "A student shouldn't need ten tabs to understand it.",
-   "dur": 3.2853333333333334,
-   "start": 103.466,
-   "end": 106.751
+   "dur": 3.1573333333333333,
+   "start": 101.991,
+   "end": 105.148
   },
   {
    "sec": "what",
    "scene": "site:Home",
    "text": "So we built one place for it. Fifteen missions, from 1966 to today, across the Moon, Mars and deep space.",
-   "dur": 9.066666666666666,
-   "start": 107.551,
-   "end": 116.618
+   "dur": 8.64,
+   "start": 105.748,
+   "end": 114.388
   },
   {
    "sec": "what",
    "scene": "site:Home scroll",
    "text": "Scroll the homepage, and the story unfolds scene by scene, from leaving Earth to the final silence.",
-   "dur": 7.125333333333334,
-   "start": 117.318,
-   "end": 124.443
+   "dur": 6.784,
+   "start": 115.038,
+   "end": 121.822
   },
   {
    "sec": "what",
    "scene": "site:Timeline / Hardware map",
    "text": "Follow six decades on the timeline, or find every machine on the hardware map.",
-   "dur": 5.504,
-   "start": 125.143,
-   "end": 130.647
+   "dur": 5.141333333333334,
+   "start": 122.472,
+   "end": 127.613
   },
   {
    "sec": "what",
    "scene": "site:Final Signal",
    "text": "Our Final Signal page separates four moments most people mix up: launch, arrival, last contact, and official closure.",
-   "dur": 8.96,
-   "start": 131.347,
-   "end": 140.307
+   "dur": 8.469333333333333,
+   "start": 128.263,
+   "end": 136.732
   },
   {
    "sec": "what",
    "scene": "site:Final Signal",
    "text": "Because \"lost\" and \"finished\" are not the same thing.",
-   "dur": 3.3066666666666666,
-   "start": 140.757,
-   "end": 144.064
+   "dur": 3.0933333333333333,
+   "start": 137.132,
+   "end": 140.225
   },
   {
    "sec": "what",
    "scene": "site:Inspect 3D",
    "text": "Pick a spacecraft and turn it around in 3D.",
-   "dur": 3.2,
-   "start": 144.764,
-   "end": 147.964
+   "dur": 2.965333333333333,
+   "start": 140.875,
+   "end": 143.84
   },
   {
    "sec": "what",
    "scene": "site:Mission Detective",
    "text": "Or play Mission Detective. Read the clues about Spirit, Opportunity, or Surveyor 3, and work out what happened.",
-   "dur": 8.021333333333333,
-   "start": 148.664,
-   "end": 156.685
+   "dur": 7.36,
+   "start": 144.49,
+   "end": 151.85
   },
   {
    "sec": "what",
    "scene": "site:Compare \u00b7 Quiz \u00b7 3D Game \u00b7 Explore Mars",
    "text": "There's a quiz, a mission comparison, and a 3D game too.",
-   "dur": 3.989333333333333,
-   "start": 157.385,
-   "end": 161.374
+   "dur": 3.6693333333333333,
+   "start": 152.5,
+   "end": 156.169
   },
   {
    "sec": "what",
    "scene": "sources",
    "text": "Every fact comes from NASA and JPL sources.",
-   "dur": 3.8613333333333335,
-   "start": 162.074,
-   "end": 165.935
+   "dur": 3.562666666666667,
+   "start": 156.819,
+   "end": 160.382
   },
   {
    "sec": "what",
    "scene": "sources",
    "text": "And when a machine \"speaks\" in first person, we label it clearly as creative interpretation, never as a real transmission.",
-   "dur": 8.64,
-   "start": 166.385,
-   "end": 175.025
+   "dur": 8.149333333333333,
+   "start": 160.782,
+   "end": 168.931
   },
   {
    "sec": "next",
    "scene": "site:About",
    "text": "Why does this matter?",
-   "dur": 1.536,
-   "start": 175.825,
-   "end": 177.361
+   "dur": 1.3653333333333333,
+   "start": 169.531,
+   "end": 170.896
   },
   {
    "sec": "next",
    "scene": "student",
    "text": "For a student, it turns space history from a list of dates into a set of stories with an ending, and a reason.",
-   "dur": 7.210666666666667,
-   "start": 178.061,
-   "end": 185.272
+   "dur": 6.890666666666666,
+   "start": 172.234,
+   "end": 179.125
   },
   {
    "sec": "next",
    "scene": "offline",
    "text": "It's built with plain HTML, CSS, and JavaScript. No framework, no backend, and most of it works offline.",
-   "dur": 9.024,
-   "start": 185.972,
-   "end": 194.996
+   "dur": 8.533333333333333,
+   "start": 180.463,
+   "end": 188.997
   },
   {
    "sec": "next",
    "scene": "offline",
    "text": "So a classroom with a weak connection can still open it. That matters where we live.",
-   "dur": 5.418666666666667,
-   "start": 195.446,
-   "end": 200.865
+   "dur": 5.141333333333334,
+   "start": 190.085,
+   "end": 195.227
   },
   {
    "sec": "next",
    "scene": "site:NASA Data",
    "text": "And it's honest. Sources are on the site, and the line between fact and imagination is never blurred.",
-   "dur": 7.168,
-   "start": 201.565,
-   "end": 208.733
+   "dur": 6.8053333333333335,
+   "start": 196.565,
+   "end": 203.371
   },
   {
    "sec": "next",
    "scene": "needs",
    "text": "This is a first version, with fifteen missions. To take it further, we need three things:",
-   "dur": 5.589333333333333,
-   "start": 209.433,
-   "end": 215.022
+   "dur": 5.248,
+   "start": 204.709,
+   "end": 209.957
   },
   {
    "sec": "next",
    "scene": "needs",
    "text": "experts to review and expand the archive,",
-   "dur": 2.7733333333333334,
-   "start": 215.472,
-   "end": 218.245
+   "dur": 2.6453333333333333,
+   "start": 211.045,
+   "end": 213.691
   },
   {
    "sec": "next",
    "scene": "needs",
    "text": "access to more NASA imagery and 3D surface data,",
-   "dur": 4.1386666666666665,
-   "start": 218.695,
-   "end": 222.834
+   "dur": 3.84,
+   "start": 214.779,
+   "end": 218.619
   },
   {
    "sec": "next",
    "scene": "needs",
    "text": "and a Bangla version, with teacher resources, so schools here can use it.",
-   "dur": 4.8213333333333335,
-   "start": 223.284,
-   "end": 228.105
+   "dur": 4.501333333333333,
+   "start": 219.707,
+   "end": 224.209
   },
   {
    "sec": "next",
    "scene": "end",
    "text": "Voyager is still talking. Opportunity went quiet.",
    "pre": 1.4,
-   "dur": 3.6266666666666665,
-   "start": 230.205,
-   "end": 233.832
+   "dur": 3.52,
+   "start": 226.947,
+   "end": 230.467
   },
   {
    "sec": "next",
    "scene": "end",
    "text": "Our job is to make sure both are heard.",
-   "dur": 2.752,
-   "start": 234.282,
-   "end": 237.034
+   "dur": 2.6026666666666665,
+   "start": 231.555,
+   "end": 234.158
   },
   {
    "sec": "next",
    "scene": "end",
    "text": "Abandoned, But Not Forgotten.",
-   "dur": 2.112,
-   "start": 237.484,
-   "end": 239.596
+   "dur": 2.005333333333333,
+   "start": 235.246,
+   "end": 237.252
   }
  ],
  "captions": [
   {
    "start": 2.5,
-   "end": 6.842,
+   "end": 6.65,
    "text": "Right now, a machine built in 1977 is still sending"
   },
   {
-   "start": 6.842,
-   "end": 10.759,
+   "start": 6.65,
+   "end": 10.393,
    "text": "us messages from more than twenty-four billion"
   },
   {
-   "start": 10.759,
-   "end": 12.121,
+   "start": 10.393,
+   "end": 11.695,
    "text": "kilometres away."
   },
   {
-   "start": 13.537,
-   "end": 16.601,
+   "start": 13.268,
+   "end": 16.219,
    "text": "And on Mars, another machine has said nothing"
   },
   {
-   "start": 16.601,
-   "end": 18.166,
+   "start": 16.219,
+   "end": 17.727,
    "text": "at all for eight years."
   },
   {
-   "start": 19.832,
-   "end": 23.779,
+   "start": 19.549,
+   "end": 23.261,
    "text": "Same agency. Same promise. Two very different endings."
   },
   {
-   "start": 25.444,
-   "end": 27.385,
+   "start": 25.084,
+   "end": 26.919,
    "text": "We're a team from Bangladesh."
   },
   {
-   "start": 28.801,
-   "end": 32.023,
+   "start": 28.491,
+   "end": 31.417,
    "text": "We're a developer, a researcher, a designer and"
   },
   {
-   "start": 32.023,
-   "end": 32.982,
+   "start": 31.417,
+   "end": 32.288,
    "text": "a storyteller."
   },
   {
-   "start": 34.648,
-   "end": 37.94,
+   "start": 34.111,
+   "end": 37.183,
    "text": "We kept asking one question: when a mission goes"
   },
   {
-   "start": 37.94,
-   "end": 40.067,
+   "start": 37.183,
+   "end": 39.167,
    "text": "quiet, where does its story go?"
   },
   {
-   "start": 41.732,
-   "end": 44.697,
+   "start": 40.99,
+   "end": 43.777,
    "text": "Our answer is a website called Abandoned,"
   },
   {
-   "start": 44.697,
-   "end": 45.999,
+   "start": 43.777,
+   "end": 45.001,
    "text": "But Not Forgotten."
   },
   {
-   "start": 46.798,
-   "end": 50.997,
+   "start": 45.6,
+   "end": 49.563,
    "text": "Since the 1960s, NASA has left hardware on the"
   },
   {
-   "start": 50.997,
-   "end": 54.009,
+   "start": 49.563,
+   "end": 52.405,
    "text": "Moon, on Mars, and in deep space."
   },
   {
-   "start": 55.165,
-   "end": 58.452,
+   "start": 53.447,
+   "end": 56.496,
    "text": "The facts exist. But they're scattered across"
   },
   {
-   "start": 58.452,
-   "end": 61.373,
+   "start": 56.496,
+   "end": 59.207,
    "text": "mission pages, press releases, and PDFs."
   },
   {
-   "start": 62.529,
-   "end": 65.686,
+   "start": 60.249,
+   "end": 63.086,
    "text": "And one word hides the truth: \"abandoned.\""
   },
   {
-   "start": 66.842,
-   "end": 69.8,
+   "start": 64.128,
+   "end": 66.956,
    "text": "Nobody drove these machines home. They worked"
   },
   {
-   "start": 69.8,
-   "end": 71.706,
+   "start": 66.956,
+   "end": 68.779,
    "text": "until something stopped them."
   },
   {
-   "start": 72.612,
-   "end": 75.599,
-   "text": "Dust. Cold. Fading power. Distance."
+   "start": 69.57,
+   "end": 70.402,
+   "text": "Dust."
   },
   {
-   "start": 76.755,
-   "end": 80.207,
+   "start": 71.194,
+   "end": 72.069,
+   "text": "Cold."
+  },
+  {
+   "start": 72.86,
+   "end": 74.183,
+   "text": "Fading power."
+  },
+  {
+   "start": 74.974,
+   "end": 75.977,
+   "text": "Distance."
+  },
+  {
+   "start": 77.018,
+   "end": 80.302,
    "text": "Opportunity was built to last ninety Martian days."
   },
   {
-   "start": 80.207,
-   "end": 82.899,
+   "start": 80.302,
+   "end": 82.863,
    "text": "It worked for more than fourteen years."
   },
   {
-   "start": 84.055,
-   "end": 88.962,
+   "start": 83.905,
+   "end": 88.534,
    "text": "Then, in 2018, a global dust storm blocked its sunlight."
   },
   {
-   "start": 89.868,
-   "end": 93.74,
+   "start": 89.326,
+   "end": 92.926,
    "text": "Engineers sent more than a thousand recovery commands."
   },
   {
-   "start": 93.74,
-   "end": 95.031,
+   "start": 92.926,
+   "end": 94.126,
    "text": "Nothing came back."
   },
   {
-   "start": 96.187,
-   "end": 99.489,
+   "start": 95.168,
+   "end": 98.286,
    "text": "That's the part that matters most: why a mission"
   },
   {
-   "start": 99.489,
-   "end": 102.31,
+   "start": 98.286,
+   "end": 100.949,
    "text": "ended. And it's the part hardest to find."
   },
   {
-   "start": 103.466,
-   "end": 106.751,
+   "start": 101.991,
+   "end": 105.148,
    "text": "A student shouldn't need ten tabs to understand it."
   },
   {
-   "start": 107.551,
-   "end": 111.688,
+   "start": 105.748,
+   "end": 109.691,
    "text": "So we built one place for it. Fifteen missions,"
   },
   {
-   "start": 111.688,
-   "end": 114.857,
+   "start": 109.691,
+   "end": 112.71,
    "text": "from 1966 to today, across the Moon,"
   },
   {
-   "start": 114.857,
-   "end": 116.618,
+   "start": 112.71,
+   "end": 114.388,
    "text": "Mars and deep space."
   },
   {
-   "start": 117.318,
-   "end": 120.808,
+   "start": 115.038,
+   "end": 118.361,
    "text": "Scroll the homepage, and the story unfolds scene"
   },
   {
-   "start": 120.808,
-   "end": 124.443,
+   "start": 118.361,
+   "end": 121.822,
    "text": "by scene, from leaving Earth to the final silence."
   },
   {
-   "start": 125.143,
-   "end": 127.645,
+   "start": 122.472,
+   "end": 124.809,
    "text": "Follow six decades on the timeline,"
   },
   {
-   "start": 127.645,
-   "end": 130.647,
+   "start": 124.809,
+   "end": 127.613,
    "text": "or find every machine on the hardware map."
   },
   {
-   "start": 131.347,
-   "end": 135.165,
+   "start": 128.263,
+   "end": 131.872,
    "text": "Our Final Signal page separates four moments most"
   },
   {
-   "start": 135.165,
-   "end": 138.671,
+   "start": 131.872,
+   "end": 135.186,
    "text": "people mix up: launch, arrival, last contact,"
   },
   {
-   "start": 138.671,
-   "end": 140.307,
+   "start": 135.186,
+   "end": 136.732,
    "text": "and official closure."
   },
   {
-   "start": 140.757,
-   "end": 144.064,
+   "start": 137.132,
+   "end": 140.225,
    "text": "Because \"lost\" and \"finished\" are not the same thing."
   },
   {
-   "start": 144.764,
-   "end": 147.964,
+   "start": 140.875,
+   "end": 143.84,
    "text": "Pick a spacecraft and turn it around in 3D."
   },
   {
-   "start": 148.664,
-   "end": 152.123,
+   "start": 144.49,
+   "end": 147.664,
    "text": "Or play Mission Detective. Read the clues about"
   },
   {
-   "start": 152.123,
-   "end": 154.698,
+   "start": 147.664,
+   "end": 150.027,
    "text": "Spirit, Opportunity, or Surveyor 3,"
   },
   {
-   "start": 154.698,
-   "end": 156.685,
+   "start": 150.027,
+   "end": 151.85,
    "text": "and work out what happened."
   },
   {
-   "start": 157.385,
-   "end": 160.069,
+   "start": 152.5,
+   "end": 154.968,
    "text": "There's a quiz, a mission comparison,"
   },
   {
-   "start": 160.069,
-   "end": 161.374,
+   "start": 154.968,
+   "end": 156.169,
    "text": "and a 3D game too."
   },
   {
-   "start": 162.074,
-   "end": 165.935,
+   "start": 156.819,
+   "end": 160.382,
    "text": "Every fact comes from NASA and JPL sources."
   },
   {
-   "start": 166.385,
-   "end": 169.553,
+   "start": 160.782,
+   "end": 163.77,
    "text": "And when a machine \"speaks\" in first person,"
   },
   {
-   "start": 169.553,
-   "end": 172.937,
+   "start": 163.77,
+   "end": 166.962,
    "text": "we label it clearly as creative interpretation,"
   },
   {
-   "start": 172.937,
-   "end": 175.025,
+   "start": 166.962,
+   "end": 168.931,
    "text": "never as a real transmission."
   },
   {
-   "start": 175.825,
-   "end": 177.361,
+   "start": 169.531,
+   "end": 170.896,
    "text": "Why does this matter?"
   },
   {
-   "start": 178.061,
-   "end": 181.333,
+   "start": 172.234,
+   "end": 175.36,
    "text": "For a student, it turns space history from a list"
   },
   {
-   "start": 181.333,
-   "end": 184.404,
+   "start": 175.36,
+   "end": 178.295,
    "text": "of dates into a set of stories with an ending,"
   },
   {
-   "start": 184.404,
-   "end": 185.272,
+   "start": 178.295,
+   "end": 179.125,
    "text": "and a reason."
   },
   {
-   "start": 185.972,
-   "end": 190.177,
+   "start": 180.463,
+   "end": 184.44,
    "text": "It's built with plain HTML, CSS, and JavaScript."
   },
   {
-   "start": 190.177,
-   "end": 194.996,
+   "start": 184.44,
+   "end": 188.996,
    "text": "No framework, no backend, and most of it works offline."
   },
   {
-   "start": 195.446,
-   "end": 198.514,
+   "start": 190.085,
+   "end": 192.996,
    "text": "So a classroom with a weak connection can still"
   },
   {
-   "start": 198.514,
-   "end": 200.865,
+   "start": 192.996,
+   "end": 195.226,
    "text": "open it. That matters where we live."
   },
   {
-   "start": 201.565,
-   "end": 204.504,
+   "start": 196.565,
+   "end": 199.355,
    "text": "And it's honest. Sources are on the site,"
   },
   {
-   "start": 204.504,
-   "end": 208.733,
+   "start": 199.355,
+   "end": 203.37,
    "text": "and the line between fact and imagination is never blurred."
   },
   {
-   "start": 209.433,
-   "end": 212.418,
+   "start": 204.709,
+   "end": 207.512,
    "text": "This is a first version, with fifteen missions."
   },
   {
-   "start": 212.418,
-   "end": 215.022,
+   "start": 207.512,
+   "end": 209.957,
    "text": "To take it further, we need three things:"
   },
   {
-   "start": 215.472,
-   "end": 218.245,
+   "start": 211.045,
+   "end": 213.69,
    "text": "experts to review and expand the archive,"
   },
   {
-   "start": 218.695,
-   "end": 222.834,
+   "start": 214.779,
+   "end": 218.619,
    "text": "access to more NASA imagery and 3D surface data,"
   },
   {
-   "start": 223.284,
-   "end": 226.297,
+   "start": 219.707,
+   "end": 222.52,
    "text": "and a Bangla version, with teacher resources,"
   },
   {
-   "start": 226.297,
-   "end": 228.105,
+   "start": 222.52,
+   "end": 224.208,
    "text": "so schools here can use it."
   },
   {
-   "start": 230.205,
-   "end": 233.832,
+   "start": 226.947,
+   "end": 230.467,
    "text": "Voyager is still talking. Opportunity went quiet."
   },
   {
-   "start": 234.282,
-   "end": 237.034,
+   "start": 231.555,
+   "end": 234.158,
    "text": "Our job is to make sure both are heard."
   },
   {
-   "start": 237.484,
-   "end": 239.596,
+   "start": 235.246,
+   "end": 237.251,
    "text": "Abandoned, But Not Forgotten."
   }
  ]

@@ -58,8 +58,22 @@
  {
   "sec": "why",
   "scene": "causes",
-  "text": "Dust. Cold. Fading power. Distance.",
-  "say": "Dust... Cold... Fading power... Distance."
+  "text": "Dust."
+ },
+ {
+  "sec": "why",
+  "scene": "causes",
+  "text": "Cold."
+ },
+ {
+  "sec": "why",
+  "scene": "causes",
+  "text": "Fading power."
+ },
+ {
+  "sec": "why",
+  "scene": "causes",
+  "text": "Distance."
  },
  {
   "sec": "why",

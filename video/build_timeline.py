@@ -2,15 +2,15 @@
 import json, re, soundfile as sf, sys
 VO = sys.argv[1]
 lines = json.load(open('/home/user/Nasavideo/video/script.json'))
-windows = {'who': (2.5, 45), 'why': (46, 105), 'what': (106, 165), 'next': (166, 233)}
+windows = {'who': (2.5, 44.0), 'why': (44.8, 103.4), 'what': (104.2, 166.6), 'next': (167.4, 236.0)}
 for i, l in enumerate(lines):
     l['dur'] = sf.info(f'{VO}/{i:02d}.wav').duration
 out, prev_end = [], 0
 for sec, (a, b) in windows.items():
     grp = [l for l in lines if l['sec'] == sec]
-    start = max(a, prev_end + 0.8)
+    start = max(a, prev_end + 0.6)
     speech = sum(l['dur'] for l in grp) + sum(l.get('pre', 0) for l in grp)
-    gap = max(0.45, min(1.6, (b - start - speech) / max(1, len(grp) - 1)))
+    gap = max(0.4, min(1.6, (b - start - speech) / max(1, len(grp) - 1)))
     t = start
     for j, l in enumerate(grp):
         t += l.get('pre', 0)

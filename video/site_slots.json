@@ -1,110 +1,56 @@
 [
  {
-  "label": "Home",
   "slug": "home",
-  "start": 107.001,
-  "end": 116.768,
-  "rect": {
-   "x": 120,
-   "y": 150,
-   "w": 1680,
-   "h": 740
-  }
+  "label": "Home",
+  "start": 105.148,
+  "end": 115.038
  },
  {
-  "label": "Home scroll",
   "slug": "home-scroll",
-  "start": 116.768,
-  "end": 124.593,
-  "rect": {
-   "x": 120,
-   "y": 150,
-   "w": 1680,
-   "h": 740
-  }
+  "label": "Home scroll",
+  "start": 115.038,
+  "end": 122.472
  },
  {
+  "slug": "timeline-map",
   "label": "Timeline / Hardware map",
-  "slug": "timeline-hardware-map",
-  "start": 124.593,
-  "end": 130.797,
-  "rect": {
-   "x": 120,
-   "y": 150,
-   "w": 1680,
-   "h": 740
-  }
+  "start": 122.472,
+  "end": 128.263
  },
  {
-  "label": "Final Signal",
   "slug": "final-signal",
-  "start": 130.797,
-  "end": 144.214,
-  "rect": {
-   "x": 120,
-   "y": 150,
-   "w": 1680,
-   "h": 740
-  }
+  "label": "Final Signal",
+  "start": 128.263,
+  "end": 140.875
  },
  {
-  "label": "Inspect 3D",
   "slug": "inspect-3d",
-  "start": 144.214,
-  "end": 148.11399999999998,
-  "rect": {
-   "x": 120,
-   "y": 150,
-   "w": 1680,
-   "h": 740
-  }
+  "label": "Inspect 3D",
+  "start": 140.875,
+  "end": 144.49
  },
  {
-  "label": "Mission Detective",
   "slug": "mission-detective",
-  "start": 148.11399999999998,
-  "end": 156.83499999999998,
-  "rect": {
-   "x": 120,
-   "y": 150,
-   "w": 1680,
-   "h": 740
-  }
+  "label": "Mission Detective",
+  "start": 144.49,
+  "end": 152.5
  },
  {
-  "label": "Compare · Quiz · 3D Game · Explore Mars",
-  "slug": "compare-quiz-3d-game-explore-mars",
-  "start": 156.83499999999998,
-  "end": 161.524,
-  "rect": {
-   "x": 120,
-   "y": 150,
-   "w": 1680,
-   "h": 740
-  }
+  "slug": "montage",
+  "label": "Compare \u00b7 Quiz \u00b7 3D Game \u00b7 Explore Mars",
+  "start": 152.5,
+  "end": 156.819
  },
  {
-  "label": "About",
   "slug": "about",
-  "start": 175.27499999999998,
-  "end": 177.511,
-  "rect": {
-   "x": 120,
-   "y": 150,
-   "w": 1680,
-   "h": 740
-  }
+  "label": "About",
+  "start": 169.131,
+  "end": 172.234
  },
  {
-  "label": "NASA Data",
   "slug": "nasa-data",
-  "start": 201.015,
-  "end": 208.88299999999998,
-  "rect": {
-   "x": 120,
-   "y": 150,
-   "w": 1680,
-   "h": 740
-  }
+  "label": "NASA Data",
+  "start": 196.165,
+  "end": 204.709
  }
 ]
