@@ -78,10 +78,14 @@ def card(k, h, sub=''):
     return f'<div class="left shadow"><div class="kicker">{k}</div><div class="h2">{h}</div>' + (f'<div class="sub">{sub}</div>' if sub else '') + '</div>'
 def chips(items, top=760):
     return f'<div class="abs" style="left:120px;top:{top}px;display:flex;gap:14px">' + ''.join(f'<span class="sig" style="font-size:26px">{r}</span>' for r in items) + '</div>'
+TEAM = [('Maliha', 'Team leader'), ('Nuhza', 'Designer'), ('Fatema', 'Data scientist'), ('Omi', 'Developer'), ('Montaha', 'Researcher'), ('Mahi', 'Storyteller')]
 SHOTS = [
     # 0:00 introduce yourself
     dict(t0=0, base=V('earthnight', 46.6, 1.12, 1.2, .5, .75), ov=[
-        O('s_intro', card('Team Cosmic Eclipse', 'Mahi', 'Sylhet, Bangladesh'), t=.15)]),
+        O('s_intro', '<div class="abs shadow" style="left:120px;top:250px"><div class="kicker">Team Cosmic Eclipse · Sylhet, Bangladesh</div></div>', t=.05, dy=0)] + [
+        O(f's_m{j}', f'<div class="abs card" style="left:{120 + (j % 3) * 560}px;top:{320 + (j // 3) * 200}px;width:520px;padding:26px 32px">'
+          f'<div class="kicker" style="color:var(--muted);font-size:22px">{role}</div><div class="h3" style="margin-top:8px">{name}</div></div>', t=.1 + j * .12, dy=20)
+        for j, (name, role) in enumerate(TEAM)]),
     # 0:02 lead us in
     dict(t0=C(1), base=I('voy_art2', 1.0, 1.1, .55, .45), ov=[O('s_voy', sig('Voyager 1 · still talking', 'blue'), t=.1)]),
     dict(t0=W(1, 'where') - .2, base=I('mer1', 1.04, 1.12, .5, .5, .4, .5), ov=[O('s_oppy', sig('Opportunity · signal: none'), t=.05, dy=0, blink=True)]),
@@ -105,9 +109,10 @@ SHOTS = [
         O('s_l', '<div class="abs" style="left:96px;top:80px"><span class="sig"><span class="dot blue"></span>Voyager · still talking</span></div>', t=.1),
         O('s_r', '<div class="abs" style="left:1056px;top:80px"><span class="sig"><span class="dot"></span>Opportunity · went quiet</span></div>', at=W(6, 'opportunity') - .1)]),
     dict(t0=W(6, 'we') - .2, base=VOID, ov=[
-        O('s_end', center('<div class="h1 grad" style="font-size:112px">Abandoned,<br>but not forgotten</div>'), t=.1, dy=24),
+        O('s_end', center('<div class="h1 grad" style="font-size:112px">Abandoned,<br>but not forgotten</div>', 'padding-bottom:260px'), t=.1, dy=24),
         O('s_url', center('<div class="sub" style="color:var(--white)">abandonedbutnotforgottenchallenge.netlify.app</div>'
-                          '<div class="kicker" style="font-size:22px">Team Cosmic Eclipse · Sylhet, Bangladesh</div>', 'justify-content:flex-end;padding-bottom:150px'), t=.4)]),
+                          '<div class="kicker" style="font-size:22px">Team Cosmic Eclipse · Sylhet, Bangladesh</div>'
+                          '<div class="sub" style="font-size:24px">' + ' · '.join(n for n, _ in TEAM) + '</div>', 'justify-content:flex-end;padding-bottom:200px'), t=.4)]),
 ]
 SHOTS.sort(key=lambda s: s['t0'])
 for a, b in zip(SHOTS, SHOTS[1:] + [dict(t0=T)]):
