@@ -26,7 +26,10 @@ def save(n, x0, x1, ya, yb):
     rgba[..., :3] = FG
     rgba[..., 3] = (a[ya:yb, x0:x1] * 255).astype(np.uint8)
     Image.fromarray(rgba).save(f'glyphs/{n}.png')
-    meta.append(dict(n=n, x=int(x0), y=int(ya), w=int(x1 - x0), h=int(yb - ya)))
+    ink = np.argwhere(a[ya:yb, x0:x1] > 0.5)
+    (iy0, ix0), (iy1, ix1) = ink.min(0), ink.max(0) + 1
+    meta.append(dict(n=n, x=int(x0), y=int(ya), w=int(x1 - x0), h=int(yb - ya),
+                     ink=[int(x0 + ix0), int(ya + iy0), int(x0 + ix1), int(ya + iy1)]))
 
 for n, (s, e) in zip(names, runs):
     s, e = s - 6, e + 6

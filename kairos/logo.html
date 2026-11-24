@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <title>KAIRŌS logo animation</title>
 <style>
-  @font-face { font-family: 'InterK'; src: url('fonts/Inter-Light.otf'); font-weight: 300; }
   @font-face { font-family: 'InterK'; src: url('fonts/Inter-Regular.otf'); font-weight: 400; }
   html, body { margin: 0; background: #362f29; overflow: hidden; }
   canvas { display: block; }
@@ -15,6 +14,10 @@
 <script>
 // Deterministic, time-driven animation: window.render(t) draws the frame at t seconds.
 // Open in a browser to preview (auto-plays + loops); render.js steps it frame by frame.
+//
+// Story: a single dot (the "moment", kairos) stretches into a line, the line splits
+// and opens like a curtain to reveal the wordmark, then the top line shrinks and
+// flies up to become the macron over the Ō.
 const P = new URLSearchParams(location.search);
 const W = +P.get('w') || 1920, H = +P.get('h') || 1080;
 const DURATION = 8.0;
@@ -25,16 +28,15 @@ const LINE2 = 'Proudly Made in Bangladesh.';
 const cv = document.getElementById('c');
 cv.width = W; cv.height = H;
 const ctx = cv.getContext('2d');
-const off = document.createElement('canvas'); off.width = W; off.height = H;
-const octx = off.getContext('2d');
 
 // ---------- easing ----------
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const prog = (t, a, b) => clamp((t - a) / (b - a));
 const outExpo = x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
 const outCubic = x => 1 - Math.pow(1 - x, 3);
-const inOutCubic = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 const outQuint = x => 1 - Math.pow(1 - x, 5);
+const inOutCubic = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const inOutQuart = x => x < .5 ? 8 * x ** 4 : 1 - Math.pow(-2 * x + 2, 4) / 2;
 const lerp = (a, b, x) => a + (b - a) * x;
 
 // ---------- assets ----------
@@ -44,155 +46,138 @@ async function load() {
   await Promise.all(meta.glyphs.map(g => new Promise(r => {
     const im = new Image(); im.onload = r; im.src = `glyphs/${g.n}.png`; imgs[g.n] = im;
   })));
-  await document.fonts.load('300 20px InterK');
   await document.fonts.load('400 20px InterK');
-  // static film grain tile (seeded so every render is identical)
   grain = document.createElement('canvas'); grain.width = grain.height = 256;
   const g = grain.getContext('2d'), id = g.createImageData(256, 256);
   let s = 1337; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < id.data.length; i += 4) {
-    const v = rnd() * 255; id.data[i] = id.data[i+1] = id.data[i+2] = v; id.data[i+3] = 10;
+    const v = rnd() * 255; id.data[i] = id.data[i+1] = id.data[i+2] = v; id.data[i+3] = 8;
   }
   g.putImageData(id, 0, 0);
 }
 
-// ---------- layout ----------
+// ---------- layout (source image px -> screen px) ----------
 function layout() {
-  const gs = meta.glyphs;
-  const x0 = Math.min(...gs.map(g => g.x)), x1 = Math.max(...gs.map(g => g.x + g.w));
-  const wordW = x1 - x0;
+  const gs = meta.glyphs, letters = gs.filter(g => g.n !== 'M');
+  const x0 = Math.min(...letters.map(g => g.ink[0])), x1 = Math.max(...letters.map(g => g.ink[2]));
+  const top = Math.min(...letters.map(g => g.ink[1])), bot = Math.max(...letters.map(g => g.ink[3]));
   const portrait = H > W * 0.9;
-  const scale = (portrait ? W * 0.62 : Math.min(W * 0.36, H * 0.62)) / wordW;
-  const cx = W / 2;
-  const baseY = H * (portrait ? 0.50 : 0.505);           // on-screen baseline
-  const srcCx = (x0 + x1) / 2, srcBase = meta.baseline;
-  const map = (x, y) => [cx + (x - srcCx) * scale, baseY + (y - srcBase) * scale];
-  return { scale, cx, baseY, wordW: wordW * scale, map, capH: (srcBase - Math.min(...gs.filter(g=>g.n!=='M').map(g => g.y))) * scale };
+  const scale = (portrait ? W * 0.64 : Math.min(W * 0.38, H * 0.66)) / (x1 - x0);
+  const cx = W / 2, cy = H * 0.47;                       // screen centre of the caps
+  const sx = (x0 + x1) / 2, sy = (top + bot) / 2;
+  const X = x => cx + (x - sx) * scale, Y = y => cy + (y - sy) * scale;
+  const m = gs.find(g => g.n === 'M');
+  return {
+    scale, cx, cy, X, Y, gs, letters, m,
+    wordW: (x1 - x0) * scale, capTop: Y(top), capBot: Y(bot), capH: (bot - top) * scale,
+    mac: { x0: X(m.ink[0]), x1: X(m.ink[2]), y0: Y(m.ink[1]), y1: Y(m.ink[3]) },
+  };
+}
+
+function bar(x0, x1, yc, th, a = 1) {
+  if (x1 - x0 < 0.3 || a <= 0) return;
+  ctx.fillStyle = `rgba(${FG},${a})`;
+  ctx.fillRect(x0, yc - th / 2, x1 - x0, th);
 }
 
 // ---------- frame ----------
 function render(t) {
   const L = layout();
-  const { scale, cx, baseY, map } = L;
+  const { scale, cx, cy, X, Y, mac } = L;
+  const macTh = mac.y1 - mac.y0, macCy = (mac.y0 + mac.y1) / 2;
+  const hair = Math.max(1.5, 2.2 * scale * 1.6 / 1.6);          // thin line thickness
+  const halfLine = L.wordW * 0.56;
+  const pad = L.capH * 0.16;
 
-  // background + soft vignette + faint warm glow behind the mark
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.globalAlpha = 1;
+  // flat brand background, very quiet vignette
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
   ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
-  const glowA = 0.10 * outCubic(prog(t, 1.0, 4.0));
-  let rg = ctx.createRadialGradient(cx, baseY - L.capH / 2, 0, cx, baseY - L.capH / 2, Math.max(W, H) * 0.45);
-  rg.addColorStop(0, `rgba(255,236,214,${glowA})`); rg.addColorStop(1, 'rgba(255,236,214,0)');
-  ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
-  rg = ctx.createRadialGradient(W/2, H/2, Math.min(W, H) * 0.35, W/2, H/2, Math.hypot(W, H) * 0.62);
-  rg.addColorStop(0, 'rgba(0,0,0,0)'); rg.addColorStop(1, 'rgba(10,7,5,0.45)');
-  ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+  const vg = ctx.createRadialGradient(W/2, H/2, Math.min(W, H) * 0.4, W/2, H/2, Math.hypot(W, H) * 0.6);
+  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(12,9,7,0.28)');
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
 
-  // global camera: slow push-in over the whole piece
-  const zoom = lerp(1.035, 1.0, outCubic(prog(t, 0, DURATION)));
+  // slow, barely-there push in
+  const zoom = lerp(1.025, 1.0, outCubic(prog(t, 0, DURATION)));
   ctx.save();
-  ctx.translate(cx, baseY); ctx.scale(zoom, zoom); ctx.translate(-cx, -baseY);
+  ctx.translate(cx, cy); ctx.scale(zoom, zoom); ctx.translate(-cx, -cy);
 
-  // 1) the hairline: a single thread of time drawn from the centre outwards
-  const lineIn = outExpo(prog(t, 0.35, 1.45));
-  const lineOut = inOutCubic(prog(t, 2.55, 3.25));
-  const halfLen = (L.wordW * 0.56) * lineIn * (1 - lineOut);
-  if (halfLen > 0.5) {
-    const ly = baseY + 1.5 * scale;
-    const lg = ctx.createLinearGradient(cx - halfLen, 0, cx + halfLen, 0);
-    lg.addColorStop(0, `rgba(${FG},0)`); lg.addColorStop(0.5, `rgba(${FG},0.9)`); lg.addColorStop(1, `rgba(${FG},0)`);
-    ctx.fillStyle = lg;
-    ctx.fillRect(cx - halfLen, ly, halfLen * 2, Math.max(1, 1.6 * scale * 1.6));
+  // --- phase 1: the dot appears (0.35 – 0.85)
+  const pDot = outExpo(prog(t, 0.35, 0.85));
+  // --- phase 2: dot stretches into a line (0.95 – 1.85)
+  const pStretch = outExpo(prog(t, 0.95, 1.85));
+  // --- phase 3: line splits and opens like a curtain (1.95 – 3.15)
+  const pOpen = inOutQuart(prog(t, 1.95, 3.15));
+  // --- phase 4: bottom line retracts, top line becomes the macron (3.35 – 4.45)
+  const pRetract = inOutCubic(prog(t, 3.3, 4.0));
+  const pMorph = inOutQuart(prog(t, 3.4, 4.45));
+
+  // letters: revealed between the two lines, tracking settles, slight vertical ease
+  const yTop = lerp(cy, L.capTop - pad, pOpen);
+  const yBot = lerp(cy, L.capBot + pad, pOpen);
+  if (pOpen > 0) {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, yTop, W, yBot - yTop); ctx.clip();
+    const spread = lerp(0.14, 0, outQuint(prog(t, 1.95, 3.9)));
+    const vs = lerp(1.18, 1, outCubic(prog(t, 1.95, 3.4)));
+    for (const g of L.letters) {
+      const gx = X(g.x), gw = g.w * scale, gcx = gx + gw / 2;
+      const dx = (gcx - cx) * spread;
+      const gy = cy + (Y(g.y) - cy) * vs, gh = g.h * scale * vs;
+      ctx.drawImage(imgs[g.n], gx + dx, gy, gw, gh);
+    }
+    ctx.restore();
   }
 
-  // 2) letters rise up out of the line, centre-out, with tracking settling in
-  octx.setTransform(1, 0, 0, 1, 0, 0);
-  octx.clearRect(0, 0, W, H);
-  const order = { R: 0, I: 0.5, O: 0.9, A: 1.3, S: 1.7, K: 2.1 };   // centre-out stagger
-  const clipBottom = baseY + 4 * scale;
-  octx.save();
-  octx.beginPath(); octx.rect(0, 0, W, clipBottom); octx.clip();
-  for (const g of meta.glyphs) {
-    if (g.n === 'M') continue;
-    const st = 1.0 + order[g.n] * 0.16;
-    const p = prog(t, st, st + 1.25);
-    if (p <= 0) continue;
-    const e = outExpo(p);
-    let [x, y] = map(g.x, g.y);
-    const gcx = x + g.w * scale / 2;
-    const spread = lerp(0.10, 0, outQuint(prog(t, st, st + 2.2)));       // tracking tightens
-    x += (gcx - cx) * spread;
-    y += (1 - e) * (L.capH * 1.05);                                          // rise from below the line
-    octx.globalAlpha = clamp(p * 2.2);
-    octx.drawImage(imgs[g.n], x, y, g.w * scale, g.h * scale);
-  }
-  octx.restore();
+  if (pOpen <= 0) {
+    // dot -> line (a single stroke on the centre line)
+    if (pDot > 0) {
+      const th = lerp(macTh * 1.7 * pDot, hair, pStretch);
+      const half = lerp(th / 2, halfLine, pStretch);
+      if (pStretch <= 0) {
+        ctx.fillStyle = `rgba(${FG},1)`;
+        ctx.beginPath(); ctx.arc(cx, cy, macTh * 0.85 * pDot, 0, Math.PI * 2); ctx.fill();
+      } else {
+        bar(cx - half, cx + half, cy, th);
+      }
+    }
+  } else {
+    // bottom line: retracts into its centre and disappears
+    const bh = halfLine * (1 - pRetract);
+    bar(cx - bh, cx + bh, yBot, hair);
 
-  // 3) the macron, the "moment": a stroke that writes itself in, last
-  const mg = meta.glyphs.find(g => g.n === 'M');
-  const mp = prog(t, 2.85, 3.55);
-  if (mp > 0) {
-    const [mx, my] = map(mg.x, mg.y);
-    const mw = mg.w * scale, mh = mg.h * scale;
-    const e = outExpo(mp);
-    const drop = (1 - outCubic(prog(t, 2.85, 3.3))) * -mh * 1.2;
-    octx.save();
-    octx.beginPath(); octx.rect(mx, my - mh * 2, mw * e, mh * 4); octx.clip();
-    octx.globalAlpha = clamp(mp * 3);
-    octx.drawImage(imgs.M, mx, my + drop, mw, mh);
-    octx.restore();
+    // top line: shrinks, lifts and thickens into the macron
+    const x0 = lerp(cx - halfLine, mac.x0, pMorph);
+    const x1 = lerp(cx + halfLine, mac.x1, pMorph);
+    const yc = lerp(yTop, macCy, pMorph);
+    const th = lerp(hair, macTh, pMorph);
+    const swap = prog(t, 4.3, 4.5);                       // hand over to the real glyph
+    bar(x0, x1, yc, th, 1 - swap);
+    if (swap > 0) {
+      ctx.globalAlpha = swap;
+      ctx.drawImage(imgs.M, X(L.m.x), Y(L.m.y), L.m.w * scale, L.m.h * scale);
+      ctx.globalAlpha = 1;
+    }
   }
 
-  // 4) light sweep across the wordmark (only lights the letters)
-  const sp = prog(t, 3.45, 4.75);
-  if (sp > 0 && sp < 1) {
-    const span = L.wordW * 1.5;
-    const sx = cx - span / 2 + inOutCubic(sp) * span;
-    const w = L.wordW * 0.16;
-    octx.save();
-    octx.globalCompositeOperation = 'source-atop';
-    octx.translate(sx, baseY - L.capH / 2); octx.rotate(0.32);
-    const sg = octx.createLinearGradient(-w, 0, w, 0);
-    sg.addColorStop(0, 'rgba(255,214,160,0)');
-    sg.addColorStop(0.5, 'rgba(255,224,182,0.75)');
-    sg.addColorStop(1, 'rgba(255,214,160,0)');
-    octx.fillStyle = sg; octx.fillRect(-w, -H, w * 2, H * 2);
-    octx.restore();
-  }
-
-  // soft bloom under the letters, then the letters themselves
-  ctx.save();
-  ctx.globalAlpha = 0.35 * outCubic(prog(t, 1.4, 3.5));
-  ctx.filter = `blur(${Math.round(14 * scale)}px)`;
-  ctx.drawImage(off, 0, 0);
-  ctx.restore();
-  ctx.drawImage(off, 0, 0);
-
-  // 5) the two lines underneath, Inter, small and quiet
-  const fs = Math.round(Math.max(13, (H > W * 0.9 ? W : Math.min(W, H * 1.7)) * 0.0125));
-  const gap = L.capH * 0.78;
+  // --- the two lines below: Inter, small, clearly readable
+  const fs = Math.round(Math.max(14, (H > W * 0.9 ? W * 1.15 : Math.min(W, H * 1.7)) * 0.0138));
+  const y1 = L.capBot + L.capH * 0.62 + fs;
   const lines = [
-    { txt: LINE1, y: baseY + gap, st: 4.15, a: 0.92, w: 400 },
-    { txt: LINE2, y: baseY + gap + fs * 2.3, st: 4.55, a: 0.62, w: 300 },
+    { txt: LINE1, y: y1,             st: 4.6,  a: 1.0 },
+    { txt: LINE2, y: y1 + fs * 2.0,  st: 4.95, a: 0.82 },
   ];
   ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.font = `400 ${fs}px InterK`;
   for (const ln of lines) {
-    const p = prog(t, ln.st, ln.st + 1.4);
+    const p = prog(t, ln.st, ln.st + 1.2);
     if (p <= 0) continue;
     const e = outCubic(p);
-    ctx.font = `${ln.w} ${fs}px InterK`;
-    ctx.letterSpacing = `${(lerp(0.55, 0.34, outQuint(p)) * fs).toFixed(2)}px`;
+    ctx.letterSpacing = `${(lerp(0.5, 0.3, outQuint(p)) * fs).toFixed(2)}px`;
     ctx.fillStyle = `rgba(${FG},${ln.a * e})`;
-    ctx.save();
-    ctx.filter = p < 0.6 ? `blur(${((1 - e) * 4).toFixed(2)}px)` : 'none';
-    ctx.fillText(ln.txt.toUpperCase(), cx, ln.y + (1 - e) * fs * 0.8);
-    ctx.restore();
+    ctx.fillText(ln.txt.toUpperCase(), cx, ln.y + (1 - e) * fs * 0.7);
   }
   ctx.letterSpacing = '0px';
   ctx.restore(); // camera
-
-  // fade from black at the head
-  const fin = prog(t, 0, 0.5);
-  if (fin < 1) { ctx.fillStyle = `rgba(18,14,11,${1 - outCubic(fin)})`; ctx.fillRect(0, 0, W, H); }
 
   // grain, shifted per frame
   const fr = Math.floor(t * 24);
