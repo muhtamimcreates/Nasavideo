@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>KAIRŌS logo animation</title>
 <style>
-  @font-face { font-family: 'InterK'; src: url('fonts/Inter-Regular.otf'); font-weight: 400; }
+  @font-face { font-family: 'InterK'; src: url('fonts/Inter-Medium.otf'); font-weight: 500; }
   html, body { margin: 0; background: #362f29; overflow: hidden; }
   canvas { display: block; }
 </style>
@@ -23,7 +23,6 @@ const W = +P.get('w') || 1920, H = +P.get('h') || 1080;
 const DURATION = 8.0;
 const BG = '#362f29', FG = '250,246,241';
 const LINE1 = 'Redefining the Standard.';
-const LINE2 = 'Proudly Made in Bangladesh.';
 
 const cv = document.getElementById('c');
 cv.width = W; cv.height = H;
@@ -46,7 +45,7 @@ async function load() {
   await Promise.all(meta.glyphs.map(g => new Promise(r => {
     const im = new Image(); im.onload = r; im.src = `glyphs/${g.n}.png`; imgs[g.n] = im;
   })));
-  await document.fonts.load('400 20px InterK');
+  await document.fonts.load('500 20px InterK');
   grain = document.createElement('canvas'); grain.width = grain.height = 256;
   const g = grain.getContext('2d'), id = g.createImageData(256, 256);
   let s = 1337; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
@@ -159,22 +158,22 @@ function render(t) {
     }
   }
 
-  // --- the two lines below: Inter, small, clearly readable
-  const fs = Math.round(Math.max(14, (H > W * 0.9 ? W * 1.15 : Math.min(W, H * 1.7)) * 0.0138));
-  const y1 = L.capBot + L.capH * 0.62 + fs;
-  const lines = [
-    { txt: LINE1, y: y1,             st: 4.6,  a: 1.0 },
-    { txt: LINE2, y: y1 + fs * 2.0,  st: 4.95, a: 0.82 },
-  ];
-  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-  ctx.font = `400 ${fs}px InterK`;
-  for (const ln of lines) {
-    const p = prog(t, ln.st, ln.st + 1.2);
-    if (p <= 0) continue;
-    const e = outCubic(p);
-    ctx.letterSpacing = `${(lerp(0.5, 0.3, outQuint(p)) * fs).toFixed(2)}px`;
-    ctx.fillStyle = `rgba(${FG},${ln.a * e})`;
-    ctx.fillText(ln.txt.toUpperCase(), cx, ln.y + (1 - e) * fs * 0.7);
+  // --- tagline: Inter Medium, revealed from the middle outwards
+  const fs = Math.round(Math.max(16, (H > W * 0.9 ? W * 1.15 : Math.min(W, H * 1.7)) * 0.019));
+  const ty = L.capBot + L.capH * 0.55 + fs;
+  const pr = prog(t, 4.6, 5.9);
+  if (pr > 0) {
+    ctx.font = `500 ${fs}px InterK`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.letterSpacing = `${(lerp(0.32, 0.22, outQuint(pr)) * fs).toFixed(2)}px`;
+    const txt = LINE1.toUpperCase();
+    const tw = ctx.measureText(txt).width + fs;
+    const half = tw / 2 * inOutQuart(pr);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(cx - half, ty - fs * 1.4, half * 2, fs * 2.2); ctx.clip();
+    ctx.fillStyle = `rgba(${FG},1)`;
+    ctx.fillText(txt, cx, ty);
+    ctx.restore();
   }
   ctx.letterSpacing = '0px';
   ctx.restore(); // camera
