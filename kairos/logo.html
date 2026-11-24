@@ -159,7 +159,7 @@ function render(t) {
   }
 
   // --- tagline: Inter Medium, revealed from the middle outwards
-  const fs = Math.round(Math.max(16, (H > W * 0.9 ? W * 1.15 : Math.min(W, H * 1.7)) * 0.019));
+  const fs = Math.round(Math.max(16, (H > W * 0.9 ? W * 1.6 : Math.min(W, H * 1.7)) * 0.019));
   const ty = L.capBot + L.capH * 0.55 + fs;
   const pr = prog(t, 4.6, 5.9);
   if (pr > 0) {
